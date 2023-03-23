@@ -49,7 +49,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=DESKTOP-FQD5SBV;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
+                optionsBuilder.UseSqlServer("Server=DESKTOP-Q6F43CF;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableSensitiveDataLogging();
             }
@@ -74,10 +74,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
             });
             modelBuilder.Entity<ChiTietCoupon>(entity =>
             {
-
                 entity.HasKey(e => new {e.MaSanPham,e.MaCoupon});
                 entity.Property(x => x.MaCoupon).HasColumnType("char(15)");
-                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaCoupon).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.CouponNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaCoupon).OnDelete(DeleteBehavior.Cascade);
 
             });
@@ -92,7 +91,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             {
                 entity.HasKey(e => new { e.MaSanPham, e.IDPN});
                 entity.Property(e => e.DVT).HasColumnType("char(10)");
-                entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); ;
+                entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
                 entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietNhapXuats).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.PhieuNhapXuatNavigation).WithMany(x => x.ChiTietNhapXuats).HasForeignKey(x => x.IDPN).OnDelete(DeleteBehavior.Cascade);
             });

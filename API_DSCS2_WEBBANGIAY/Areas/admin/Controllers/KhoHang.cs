@@ -39,7 +39,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 maChiNhanh = "CN01";
             }
-            var products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).Where(x => x.MaChiNhanh.Trim() == maChiNhanh.Trim()&&x.SanPhamNavigation.ParentID!=null);
+            var products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).ThenInclude(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation).Where(x => x.MaChiNhanh.Trim() == maChiNhanh.Trim()&&x.SanPhamNavigation.ParentID!=null);
             if (s is not null&&s.Length > 0 )
             {
                 products = products.Where(x=>x.SanPhamNavigation.TenSanPham.Trim().Contains(s.Trim())); 

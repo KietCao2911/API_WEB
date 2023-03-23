@@ -28,7 +28,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             try
             {
                 var baseURL = _configuration.GetSection("BaseURL").Value;
-                pageSize = pageSize == 0 ? 5 : pageSize;
+                pageSize = pageSize == 0 ? 2 : pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
 
@@ -71,40 +71,40 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                         break;
                 }
                 var result = await PaggingService<SanPham>.CreateAsync((IQueryable<SanPham>)products, page ?? 1, pageSize);
-                var select = result.Select(x => new
-                {
-                    Id = x?.Id,
-                    MaSanPham = x.MaSanPham.Trim(),
-                    TenSanPham = x?.TenSanPham.Trim(),
-                    GiaBanLe = x?.GiaBanLe,
-                    GiamGia = x?.GiamGia,
-                    Slug = x?.Slug,
-                    IdBstNavigation = x.IdBstNavigation,
-                    IDVAT = x.IDVat,
-                    VatNavigation = x?.VatNavigation,
-                    ChiTietHinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
-                    {
-                        uid = x.IdHinhAnh,
-                        name = x.IdHinhAnhNavigation.FileName,
-                        status = "done",
-                        url = baseURL+"\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim(),
-                        IdMaMau = x.IdMaMau,
-                    }).GroupBy(x => x.IdMaMau),
-                    SoLuongTon = x.SoLuongTon,
-                    SoLuongCoTheban = x.SoLuongCoTheban,
-                    TypeNavigation = x?.TypeNavigation,
-                    BrandNavigation = x?.BrandNavigation,
-                    MauSacNavigation = x?.MauSacNavigation,
-                    SizeNavigation = x?.SizeNavigation,
-                    IDType = x?.IDType,
-                    IDBrand = x?.IDBrand,
-                    SanPhams = x.SanPhams,
+                //var select = result.Select(x => new
+                //{
+                //    Id = x?.Id,
+                //    MaSanPham = x.MaSanPham.Trim(),
+                //    TenSanPham = x?.TenSanPham.Trim(),
+                //    GiaBanLe = x?.GiaBanLe,
+                //    GiamGia = x?.GiamGia,
+                //    Slug = x?.Slug,
+                //    IdBstNavigation = x.IdBstNavigation,
+                //    IDVAT = x.IDVat,
+                //    VatNavigation = x?.VatNavigation,
+                //    ChiTietHinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
+                //    {
+                //        uid = x.IdHinhAnh,
+                //        name = x.IdHinhAnhNavigation.FileName,
+                //        status = "done",
+                //        url = baseURL+"\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim(),
+                //        IdMaMau = x.IdMaMau,
+                //    }).GroupBy(x => x.IdMaMau),
+                //    SoLuongTon = x.SoLuongTon,
+                //    SoLuongCoTheban = x.SoLuongCoTheban,
+                //    TypeNavigation = x?.TypeNavigation,
+                //    BrandNavigation = x?.BrandNavigation,
+                //    MauSacNavigation = x?.MauSacNavigation,
+                //    SizeNavigation = x?.SizeNavigation,
+                //    IDType = x?.IDType,
+                //    IDBrand = x?.IDBrand,
+                //    SanPhams = x.SanPhams,
 
-                }); ; ;
+                //}); ; ;
                 return Ok(new
                 {
-                    products,
-                    totalRow = products.Count(),
+                    products= result,
+                    //totalRow = products.Count(),
                 });
             }
             catch (Exception ex)

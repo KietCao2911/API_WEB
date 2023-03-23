@@ -83,6 +83,42 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 await trans.RollbackAsync();
             }
         }
+        [HttpPost]
+        public async Task<ActionResult<PhieuNhapXuat>> PostPhieuNhap(PhieuNhapXuat body)
+        {
+            var trans = _context.Database.BeginTransaction();
+            try
+            {
+                if (body.steps <= 2)
+                {
+                    foreach (var item in body.ChiTietNhapXuats)
+                    {
+                        var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
+                        item.TenPhieu = "Nhập hàng vào kho";
+                        if (khohang is not null)
+                        {
+                            khohang.SoLuongHangDangVe += item.SoLuong;
+                            _context.KhoHangs.Update(khohang);
+                        }
+
+                    }
+                }
+
+                body.status = 1;
+                body.NhaCungCapNavigation = null;
+                _context.PhieuNhapXuats.Add(body);
+
+                await _context.SaveChangesAsync();
+                await trans.CommitAsync();
+                return Ok(body);
+            }
+            catch (Exception err)
+            {
+                return BadRequest(err.InnerException.Message);
+                await trans.RollbackAsync();
+            }
+
+        }
         [HttpPut("NhapKho")]
         public async Task<IActionResult> NhapKho(PhieuNhapXuat body)
         {

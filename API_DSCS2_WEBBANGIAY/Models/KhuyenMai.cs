@@ -13,6 +13,5 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? SoLuongGiamGia { get; set; } = 0;
         public int? SoLuongConlai { get; set; } = 0;
         public int? TrangThai { get; set; } = 0;
-
     }
 }

@@ -34,7 +34,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
             try
             {
-                pageSize = pageSize == 0 ? 5 : pageSize;
+                pageSize = pageSize == 0 ? 20: pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 if (id != "undefined")
                 {
