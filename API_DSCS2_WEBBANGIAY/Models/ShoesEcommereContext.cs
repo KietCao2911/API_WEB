@@ -49,7 +49,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=DESKTOP-Q6F43CF;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
+                optionsBuilder.UseSqlServer("Server=DESKTOP-FQD5SBV;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableSensitiveDataLogging();
             }

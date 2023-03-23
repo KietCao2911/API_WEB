@@ -1,4 +1,5 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -29,6 +30,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
+                brand.Slug = CustomSlug.Slugify(brand.Name);
                 _context.Brands.Add(brand);
                 await _context.SaveChangesAsync();
                 return Ok(brand);

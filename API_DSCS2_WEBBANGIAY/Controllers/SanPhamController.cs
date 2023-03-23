@@ -22,17 +22,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             _context = context;
             _configuration = configuration;
         }
-        [HttpGet("GetAll/{id}")]
-        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color, int pageSize, int? page, string id, [FromQuery(Name = "s")] string s)
+        [HttpGet("GetAll")]
+        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, 
+            [FromQuery(Name = "color")] string color, int pageSize, int? page, [FromQuery(Name = "category")] string category, [FromQuery(Name = "brand")] string brand, [FromQuery(Name = "s")] string s)
         {
             try
             {
                 var baseURL = _configuration.GetSection("BaseURL").Value;
-                pageSize = pageSize == 0 ? 2 : pageSize;
+                pageSize = pageSize == 0 ? 10 : pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
-                var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
-
-
+                var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == category);
                 products = _context.SanPhams.
                    Include(x => x.IdBstNavigation).
                    Include(x => x.ChiTietHinhAnhs).
@@ -42,7 +41,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                    .Include(x => x.BrandNavigation)
                    .Include(x => x.VatNavigation)
                    .Include(x => x.DanhMucDetails)
-                   .Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Where(x => x.ParentID == null);
+                    .Where(x => x.ParentID == null);
+                if(brand is not null && brand.Length>0)
+                {
+                    products = products.Where(x => x.BrandNavigation.Slug.Trim().ToLower() == brand);
+                }
+                if(category is not null && category.Length>0)
+                {
+                    products = products
+                  .Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Where(x => x.ParentID == null);
+                }
                 if (s is not null && s.Length > 0)
                 {
                     products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
