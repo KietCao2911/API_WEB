@@ -43,6 +43,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<ChiTietNhapXuat> ChiTietNhapXuats { get; set; }
         public virtual DbSet<Coupon> Coupons { get; set; }
         public virtual DbSet<ChiTietCoupon> ChiTietCoupons { get; set; }
+        public virtual DbSet<ChiTietBST> ChiTietBSTs { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -65,6 +66,14 @@ namespace API_DSCS2_WEBBANGIAY.Models
             //    entity.Property(e => e.Id).ValueGeneratedOnAdd();
             //    entity.Property(e => e.RoleName).HasColumnType("nvarchar(30)");
             //});
+            modelBuilder.Entity<ChiTietBST>(entity =>
+            {
+
+                entity.HasKey(e => new{ e.IDBST,e.MaSanPham});
+                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietBSTs).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.BSTNavigation).WithMany(x => x.ChiTietBSTs).HasForeignKey(x => x.IDBST).OnDelete(DeleteBehavior.Cascade);
+
+            });
             modelBuilder.Entity<Coupon>(entity =>
             {
 
@@ -471,9 +480,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
                 entity.Property(e => e.MaSanPham).HasColumnType("char(10)");
                 entity.ToTable("SanPham");
-                entity.HasIndex(e => e.IdBst, "IX_SanPham__id_BST");
                 entity.Property(e => e.Mota).HasColumnType("ntext");
-                entity.Property(e => e.IdBst).HasColumnName("_id_BST");
                 entity.Property(e => e.Slug)
                     .HasMaxLength(500)
                     .IsUnicode(false)
@@ -485,11 +492,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .IsRequired();
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("getdate()");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("getdate()");
-                entity.HasOne(d => d.IdBstNavigation)
-                    .WithMany(p => p.SanPhams)
-                    .HasForeignKey(d => d.IdBst)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("fk_sanpham_BST");
+            
                 entity.HasOne(x => x.TypeNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDType).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(x => x.BrandNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDBrand).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(x => x.VatNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDVat).OnDelete(DeleteBehavior.Cascade);

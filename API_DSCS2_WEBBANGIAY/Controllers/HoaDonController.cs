@@ -27,38 +27,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             _context = context;
             _configuration = Configuration;
         }
-        //[HttpPost("PostWithUser")]
-        //public async Task<IActionResult> PostWithUser([FromBody] DonhangModel body)
-        //{
-        //    if (body.HoaDon.PhuongThucThanhToan == "COD")
-        //    {
-        //        var HoaDon = await CreateOrder(body);
-        //        if (HoaDon == null)
-        //        {
-        //            return BadRequest();
-        //        }
-        //        List<ChiTietHoaDon> cthd = new List<ChiTietHoaDon>();
-        //        foreach (var item in body.hoaDonDetails)
-        //        {
 
-        //            var chitietHoaDon = _context.ChiTietHoaDons.Include(x => x.MasanPhamNavigation).Include(x => x.SizePhamNavigation)
-        //                .Include(x => x.MausacPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).FirstOrDefault(x => x.IdHoaDon == item.IdHoaDon);
-        //            cthd.Add(chitietHoaDon);
-        //        }
-        //        await mailService.SendEmailAsync(new MailRequest { ToEmail = "truongkiet.hn289@gmail.com", Subject = "Xác nhận đơn hàng", Body = FillData.Teamplate(HoaDon, cthd) });
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        var HoaDon = await CreateOrder(body);
-        //        var tk = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == HoaDon.HoaDon.idTaiKhoan.Trim());
-        //        tk.TienThanhToan = HoaDon.HoaDon.TienThanhToan;
-        //        _context.TaiKhoans.Update(tk);
-        //        await _context.SaveChangesAsync();
-        //        return await VNPAY(HoaDon);
-        //    }
-        //        return Ok();
-        //}
         private async Task<IActionResult> VNPAY(PhieuNhapXuat HoaDon)
         {
             
@@ -167,16 +136,77 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             }
                 return Ok();
         }
+        //[HttpPost("PostWithUser")]
+        //public async Task<IActionResult> PostWithUser([FromBody] DonhangModel body)
+        //{
+        //    if (body.HoaDon.PhuongThucThanhToan == "COD")
+        //    {
+        //        var HoaDon = await CreateOrder(body);
+        //        if (HoaDon == null)
+        //        {
+        //            return BadRequest();
+        //        }
+        //        List<ChiTietHoaDon> cthd = new List<ChiTietHoaDon>();
+        //        foreach (var item in body.hoaDonDetails)
+        //        {
+
+        //            var chitietHoaDon = _context.ChiTietHoaDons.Include(x => x.MasanPhamNavigation).Include(x => x.SizePhamNavigation)
+        //                .Include(x => x.MausacPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).FirstOrDefault(x => x.IdHoaDon == item.IdHoaDon);
+        //            cthd.Add(chitietHoaDon);
+        //        }
+        //        await mailService.SendEmailAsync(new MailRequest { ToEmail = "truongkiet.hn289@gmail.com", Subject = "Xác nhận đơn hàng", Body = FillData.Teamplate(HoaDon, cthd) });
+        //        return Ok();
+        //    }
+        //    else
+        //    {
+        //        var HoaDon = await CreateOrder(body);
+        //        var tk = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == HoaDon.HoaDon.idTaiKhoan.Trim());
+        //        tk.TienThanhToan = HoaDon.HoaDon.TienThanhToan;
+        //        _context.TaiKhoans.Update(tk);
+        //        await _context.SaveChangesAsync();
+        //        return await VNPAY(HoaDon);
+        //    }
+        //        return Ok();
+        //}
+        private PhieuNhapXuat order(PhieuNhapXuat body)
+        {
+            try
+            {
+                body.steps = 1;
+                foreach (var item in body.ChiTietNhapXuats)
+                {
+                    _context.Entry(item).State = EntityState.Added;
+
+                }
+
+                _context.Entry(body).State = EntityState.Added;
+                _context.Entry(body.DiaChiNavigation).State = EntityState.Added;
+                _context.SaveChanges();
+                return body;
+            }
+            catch (Exception ex)
+            {
+                return null ;
+            }
+        }
         [HttpPost("CreateOrder")]
         public async Task<IActionResult> CreateOrder(PhieuNhapXuat body)
         {
             try
             {
-                body.steps = 1;
-                _context.PhieuNhapXuats.Add(body);
-                _context.SaveChanges();
-                return Ok(body);
-            }catch (Exception ex)
+                if(body.PhuongThucThanhToan == "COD")
+                {
+                    var res = order(body);
+                    return Ok(body);
+                }
+                else
+                {
+                    var hoadon = order(body);
+                    await _context.SaveChangesAsync();
+                    return await VNPAY(hoadon);
+                }
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex);
             }

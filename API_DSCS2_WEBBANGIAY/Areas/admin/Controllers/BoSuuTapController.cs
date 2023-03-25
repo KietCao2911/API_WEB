@@ -28,53 +28,20 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         public async Task<ActionResult<IEnumerable<BoSuuTap>>> GetBoSuuTaps()
         {
             var bsts = await _context.BoSuuTaps.ToListAsync();
-            return Ok(bsts.Select(x => new
-            {
-                Key = x.Id,
-                Id = x.Id,
-                Img = x.Img,
-                TenBoSuuTap = x.TenBoSuuTap
-            }));;
+            return Ok(bsts);;
         }
-        [HttpGet("GetProductByBST/{id}")]
-        public async Task<ActionResult<IEnumerable<BoSuuTap>>> GetProductByBST(int id)
-        {
-            var products = await _context.SanPhams.Where(x=>x.IdBst==id).ToListAsync();
-            var select = products.Select(x => new
-            {
-                ID = x?.Id,
-                TenSanPham = x?.TenSanPham,
-                //DanhMuc = new { key = x?.IdDmNavigation?.Id, value = x?.IdDmNavigation?.TenDanhMuc },
-                //BoSuuTap = new { key = x?.IdBstNavigation?.Id, value = x?.IdBstNavigation?.TenBoSuuTap },
-                //Img = x?.Img,
-                //Sex = new
-                //{
-                //    Value = x?.IdDmNavigation.GioiTinhCodeNavigation?.GioitinhText,
-                //    Key = x?.IdDmNavigation?.GioiTinhCodeNavigation?.GioitinhCode
-                //},
-
-            }); ;
-            return Ok(select); 
-
-        }
+      
         // GET: api/BoSuuTap/5
         [HttpGet("{id}")]
         public async Task<ActionResult> GetBoSuuTap(int id)
         {
-            var boSuuTap = await _context.BoSuuTaps.FindAsync(id);
-
+            var boSuuTap = await _context.BoSuuTaps.Include(x=>x.ChiTietBSTs).ThenInclude(x=>x.SanPhamNavigation).FirstOrDefaultAsync(x=>x.Id ==id);
             if (boSuuTap == null)
             {
                 return NotFound();
             }
 
-            return Ok( new
-            {
-                Key = boSuuTap.Id,
-                Id = boSuuTap.Id,
-                Img = boSuuTap.Img,
-                TenBoSuuTap = boSuuTap.TenBoSuuTap,
-            }); ;
+            return Ok(boSuuTap); ;
         }
 
         // PUT: api/BoSuuTap/5
@@ -113,17 +80,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost]
         public async Task<ActionResult<BoSuuTap>> PostBoSuuTap(BoSuuTap boSuuTap)
         {
-            boSuuTap.Slug = CustomSlug.Slugify(boSuuTap.TenBoSuuTap);
-            _context.BoSuuTaps.Add(boSuuTap);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBoSuuTap", new { id = boSuuTap.Id }, new
+            try
             {
-                Key= boSuuTap.Id,
-                Id = boSuuTap.Id,
-                Img = boSuuTap.Img,
-                TenBoSuuTap = boSuuTap.TenBoSuuTap,
-            });
+                boSuuTap.Slug = CustomSlug.Slugify(boSuuTap.TenBoSuuTap);
+                _context.BoSuuTaps.Add(boSuuTap);
+                await _context.SaveChangesAsync();
+
+                return Ok(boSuuTap);
+            }
+            catch(Exception err)
+            {
+                return BadRequest();
+            }
         }
 
         // DELETE: api/BoSuuTap/5
@@ -146,11 +114,17 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             if (file != null)
             {
+
+                var folder = "wwwroot//res//BstImgs";
                 var path = Path.Combine(
-                Directory.GetCurrentDirectory(), "wwwroot//res//BstImgs",
-                file.FileName);
+          Directory.GetCurrentDirectory(), folder,
+          file.FileName);
                 FileInfo File = new FileInfo(path);
-                if(File.Exists)
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+                if (File.Exists)
                 {
                     return BadRequest(new
                     {
@@ -169,12 +143,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                 BST.Img = file.FileName;
                                 _context.BoSuuTaps.Update(BST);
                                 await _context.SaveChangesAsync();
-                                return Ok(new
-                                {
-                                    success = true,
-                                    img = file.FileName,
+                            return Ok(new
+                            {
+                                img = file.FileName
 
-                                });
+                            }); ;
                             
                       
                                
@@ -230,25 +203,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             return BadRequest();
         }
-        [HttpDelete("RemoveProductsFormBST/{maSP}")]
-        public async Task<IActionResult> RemoveProductsFormBST(string maSP)
-        {
-            var product = await _context.SanPhams.FindAsync(maSP);
-            if (product is not null)
-            {
-                try
-                {
-                    product.IdBst = null;
-                    await _context.SaveChangesAsync();
-                    return Ok();
-                }
-                catch (Exception err)
-                {
-                    BadRequest(err.Message);
-                }
-            }
-            return BadRequest("Không tòn tại sản phẩm này");
-        }
+        
         private bool BoSuuTapExists(int id)
         {
             return _context.BoSuuTaps.Any(e => e.Id == id);

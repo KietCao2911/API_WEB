@@ -36,8 +36,11 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("Img")
                         .HasColumnType("text");
 
-                    b.Property<string>("MaSanPham")
+                    b.Property<string>("Mota")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("Show")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(30)
@@ -155,6 +158,24 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasIndex("MaSanPham");
 
                     b.ToTable("KhoHangs");
+                });
+
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietBST", b =>
+                {
+                    b.Property<int>("IDBST")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MaSanPham")
+                        .HasColumnType("char(10)");
+
+                    b.Property<string>("img")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IDBST", "MaSanPham");
+
+                    b.HasIndex("MaSanPham");
+
+                    b.ToTable("ChiTietBSTs");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietCoupon", b =>
@@ -812,12 +833,14 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("IdBst")
-                        .HasColumnType("int")
-                        .HasColumnName("_id_BST");
+                    b.Property<int?>("IdBstNavigationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Mota")
                         .HasColumnType("ntext");
+
+                    b.Property<string>("MotaChiTiet")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ParentID")
                         .HasColumnType("char(10)");
@@ -859,9 +882,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.HasIndex("IDVat");
 
-                    b.HasIndex("ParentID");
+                    b.HasIndex("IdBstNavigationId");
 
-                    b.HasIndex(new[] { "IdBst" }, "IX_SanPham__id_BST");
+                    b.HasIndex("ParentID");
 
                     b.ToTable("SanPham");
                 });
@@ -1008,6 +1031,25 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .IsRequired();
 
                     b.Navigation("BranchNavigation");
+
+                    b.Navigation("SanPhamNavigation");
+                });
+
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietBST", b =>
+                {
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.BoSuuTap", "BSTNavigation")
+                        .WithMany("ChiTietBSTs")
+                        .HasForeignKey("IDBST")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.SanPham", "SanPhamNavigation")
+                        .WithMany("ChiTietBSTs")
+                        .HasForeignKey("MaSanPham")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BSTNavigation");
 
                     b.Navigation("SanPhamNavigation");
                 });
@@ -1258,10 +1300,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.BoSuuTap", "IdBstNavigation")
-                        .WithMany("SanPhams")
-                        .HasForeignKey("IdBst")
-                        .HasConstraintName("fk_sanpham_BST")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("IdBstNavigationId");
 
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.SanPham", "SanPhamNavigation")
                         .WithMany("SanPhams")
@@ -1297,7 +1337,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.BoSuuTap", b =>
                 {
-                    b.Navigation("SanPhams");
+                    b.Navigation("ChiTietBSTs");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Branchs", b =>
@@ -1378,6 +1418,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SanPham", b =>
                 {
+                    b.Navigation("ChiTietBSTs");
+
                     b.Navigation("ChiTietCoupons");
 
                     b.Navigation("ChiTietHinhAnhs");

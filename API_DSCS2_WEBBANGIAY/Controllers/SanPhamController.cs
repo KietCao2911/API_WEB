@@ -32,15 +32,9 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 pageSize = pageSize == 0 ? 10 : pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == category);
-                products = _context.SanPhams.
-                   Include(x => x.IdBstNavigation).
-                   Include(x => x.ChiTietHinhAnhs).
-                   ThenInclude(x => x.IdHinhAnhNavigation)
+                products = _context.SanPhams
                    .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
-                   .Include(x => x.TypeNavigation)
                    .Include(x => x.BrandNavigation)
-                   .Include(x => x.VatNavigation)
-                   .Include(x => x.DanhMucDetails)
                     .Where(x => x.ParentID == null);
                 if(brand is not null && brand.Length>0)
                 {
@@ -112,7 +106,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 return Ok(new
                 {
                     products= result,
-                    //totalRow = products.Count(),
+                    totalRow = products.Count(),
                 });
             }
             catch (Exception ex)
@@ -124,22 +118,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         public async Task<ActionResult<SanPham>> GetSanPham(string slug)
         {
             var baseURL = _configuration.GetSection("BaseURL").Value;
-            var sanPham = await _context.SanPhams.
+            var sanPham = await _context.SanPhams
 
-                      Include(x => x.IdBstNavigation).Include(x => x.SanPhams).
+                      .Include(x => x.SanPhams).
                       ThenInclude(x => x.SizeNavigation)
                       .Include(x => x.SanPhams)
                       .ThenInclude(x => x.MauSacNavigation)
                        .Include(x => x.SanPhams)
-                       .ThenInclude(x => x.KhoHangs).ThenInclude(x => x.BranchNavigation)
                       .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).
                       Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).ThenInclude(x => x.PhieuNhapXuatNavigation)
                       .Include(x => x.SanPhams).ThenInclude(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
-                       .Include(x => x.VatNavigation)
-                      .Include(x => x.TypeNavigation)
-                      .Include(x => x.BrandNavigation).
-                       Include(x => x.ChiTietHinhAnhs)
-                       .ThenInclude(x => x.IdHinhAnhNavigation)
                        .FirstOrDefaultAsync(x => x.Slug.Trim() == slug.Trim() && x.ParentID == null);
             if (sanPham == null)
             {

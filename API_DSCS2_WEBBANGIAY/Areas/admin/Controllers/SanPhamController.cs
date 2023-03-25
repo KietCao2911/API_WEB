@@ -28,42 +28,19 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/SanPham
         [HttpGet]
-        [Route("/api/san-pham/{id}")]
-        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color, int pageSize, int? page, string id, [FromQuery(Name = "sale")] bool sale, [FromQuery(Name = "s")]  string s)
+
+        public async Task<ActionResult> GetSanPhams(string? sort, int pageSize, int? page, [FromQuery(Name = "s")]  string s)
         {
 
             try
             {
                 pageSize = pageSize == 0 ? 20: pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
-                if (id != "undefined")
-                {
-                    var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
-                    products = _context.SanPhams.
-                       Include(x => x.IdBstNavigation).
-                       Include(x => x.ChiTietHinhAnhs).
-                       ThenInclude(x => x.IdHinhAnhNavigation)
-                       .Include(x=>x.SanPhams).ThenInclude(x=>x.ChiTietHinhAnhs)
-                       .Include(x=>x.TypeNavigation)
-                       .Include(x=>x.BrandNavigation)
-                       .Include(x=>x.VatNavigation)
-                       .Include(x => x.DanhMucDetails)
-                       .Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Include(x => x.SizeNavigation).Where(x=>x.ParentID==null);
-                }
-                else
-                {
-                    products = _context.SanPhams.
-                      Include(x => x.IdBstNavigation)
-                      .Include(x=>x.MauSacNavigation)
-                      .Include(x=>x.SizeNavigation)
-                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
-                      .Include(x => x.VatNavigation)
-                      .Include(x => x.TypeNavigation)
-                      .Include(x => x.BrandNavigation).
-                      Include(x => x.ChiTietHinhAnhs)
-                      .ThenInclude(x => x.IdHinhAnhNavigation).Where(x => x.ParentID == null);
-                  
-                }
+                products = _context.SanPhams.
+                      Include(x => x.ChiTietHinhAnhs).
+                      ThenInclude(x => x.IdHinhAnhNavigation)
+                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
+                      .Where(x => x.ParentID == null).OrderBy(x=>x.CreatedAt);
                 if (s is not null && s.Length > 0)
                 {
                     products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
@@ -92,7 +69,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     GiaBan = x?.GiaBanLe,
                     GiamGia = x?.GiamGia,
                     Slug = x?.Slug,
-                    IdBstNavigation = x.IdBstNavigation,
                     IDVAT = x.IDVat,
                     VatNavigation = x?.VatNavigation,
                     ChiTietHinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
@@ -131,9 +107,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [Route("san-pham/{slug}")]
         public async Task<ActionResult<SanPham>> GetSanPham(string slug)
         {
-            var sanPham = await _context.SanPhams.
+            var sanPham = await _context.SanPhams
 
-                      Include(x => x.IdBstNavigation).Include(x => x.SanPhams).
+                      .Include(x => x.SanPhams).
                       ThenInclude(x=>x.SizeNavigation)
                       .Include(x=>x.DanhMucDetails)
                       .Include(x => x.SanPhams)
@@ -252,9 +228,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             var ID = new GenKey();
                             _context.Keys.Add(ID);
                             await _context.SaveChangesAsync();
-                            products[i].IDVat = body.IDVat;
-                            products[i].IDBrand = body.IDBrand;
-                            products[i].IDType = body.IDType;
+                            //products[i].IDVat = body.IDVat;
+                            //products[i].IDBrand = body.IDBrand;
+                            //products[i].IDType = body.IDType;
                             products[i].MaSanPham = "CTK0" + ID.ID.ToString();
                             products[i].ParentID = body.MaSanPham;
                             products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;

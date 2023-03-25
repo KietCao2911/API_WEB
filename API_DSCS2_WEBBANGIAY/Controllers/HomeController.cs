@@ -18,29 +18,28 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             _context = context;
         }
+        //[HttpGet("ProductByBrand")]
+        //public async Task<IActionResult>  ()
+        //{
+        //    try
+        //    {
+        //        var res  = _context.Types.Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).
+        //               ThenInclude(x => x.IdHinhAnhNavigation).Take(8);
+        //        return Ok(res);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);  
+        //    }
+        //}
         [HttpGet("ProductsLatesUpdate")]
         public async Task<IActionResult> ProductsLatesUpdate(string MaChiNhanh)
         {
-            //var khohangs =  _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.BranchNavigation);
-            //var temp = await _context.KhoHangs.Include(x => x.SanPhamNavigation).ThenInclude(x => x.IdBstNavigation)
-            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).
-            //           ThenInclude(x => x.IdHinhAnhNavigation)
-            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
-            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.TypeNavigation)
-            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.BrandNavigation)
-            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.DanhMucDetails)
-            //    .Include(x => x.BranchNavigation).Where(x => x.SanPhamNavigation.ParentID == null).Where(x=>x.BranchNavigation.MaChiNhanh.Trim()== MaChiNhanh).OrderBy(x => x.SanPhamNavigation.CreatedAt).ToListAsync();
+     
             var products = await _context.SanPhams
-                  .Include(x => x.IdBstNavigation).
-                       Include(x => x.ChiTietHinhAnhs).
-                       ThenInclude(x => x.IdHinhAnhNavigation)
                        .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
-                       .Include(x => x.TypeNavigation)
-                       .Include(x => x.BrandNavigation)
-                       .Include(x => x.DanhMucDetails)
-                       .Include(x => x.KhoHangs)
                        .Where(x => x.ParentID == null)
-               .OrderBy(x => x.CreatedAt).ToListAsync();
+               .OrderByDescending(x => x.CreatedAt).ToListAsync();
             //var select = products.Select(x => new
             //{
             //    Id = x.Id,
