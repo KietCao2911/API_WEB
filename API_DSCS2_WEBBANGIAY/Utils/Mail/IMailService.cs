@@ -5,6 +5,7 @@ namespace API_DSCS2_WEBBANGIAY.Utils.Mail
     public interface IMailService
     {
 
-        Task SendEmailAsync(MailRequest mailRequest);
+        void SendEmail(MailRequest mailRequest);
+        Task SendEmailAsync(MailRequest request);
     }
 }

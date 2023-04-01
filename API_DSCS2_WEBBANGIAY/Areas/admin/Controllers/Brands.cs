@@ -22,8 +22,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var brands = _context.Brands.ToList();
-            return Ok(brands);
+            try
+            {
+                var brands = _context.Brands.ToList();
+                return Ok(brands);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
         [HttpPost]
         public async Task<IActionResult> Post(Brand brand)

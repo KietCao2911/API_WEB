@@ -24,7 +24,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetPhieuNhaps()
         {
-            return await _context.PhieuNhapXuats.Where(x=>x.LoaiPhieu=="PHIEUNHAP").ToListAsync();
+            try
+            {
+                return await _context.PhieuNhapXuats.Where(x => x.LoaiPhieu == "PHIEUNHAP").ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
         }
 
         // GET: api/PhieuNhaps/5
@@ -159,8 +166,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             catch(Exception err)
             {
-                return BadRequest();
                 await trans.RollbackAsync();
+                return BadRequest();
             }
         }
         

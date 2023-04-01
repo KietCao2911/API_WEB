@@ -46,8 +46,23 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet("GetAllDanhMuc")]
         public async Task<IActionResult> GetAllDanhMuc()
         {
-            var danhmucs = await _context.DanhMucs.ToListAsync();
-            return Ok(danhmucs);
+            try
+            {
+                var danhmucs = await _context.DanhMucs.ToListAsync();
+                if(danhmucs is not null && danhmucs.Count > 0)
+                {
+                    return Ok(danhmucs);
+
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch(Exception ex)
+            {
+                return NotFound();
+            }
         }
         // GET: api/DanhMuc/5
         [HttpGet("GetDanhMucByParentId/{id}")]
@@ -72,11 +87,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             //{
             //    return BadRequest();
             //}
-            danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
-            _context.Entry(danhMuc).State = EntityState.Modified;
+         
 
             try
             {
+                danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
+                _context.Entry(danhMuc).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

@@ -33,6 +33,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public decimal? GiaBanSi { set; get; } = 0;
         public int? SoLuongTon { set; get; } = 0;
         public int? SoLuongCoTheban { set; get; } = 0;
+        public int? SoLuongDaBan { set; get; } = 0;
         public decimal? GiaVon { set; get; } = 0;
         public string? Mota { get; set; }
         public string? MotaChiTiet { get; set; }

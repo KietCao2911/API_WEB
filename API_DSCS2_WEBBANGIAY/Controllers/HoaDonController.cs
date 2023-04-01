@@ -1,10 +1,13 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using API_DSCS2_WEBBANGIAY.Utils.Mail;
+using API_DSCS2_WEBBANGIAY.Utils.Mail.Templates;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
@@ -18,14 +21,20 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
     [ApiController]
     public class HoaDonController : ControllerBase
     {
+
         private readonly ShoesEcommereContext _context;
         private readonly IMailService mailService;
         private readonly IConfiguration _configuration;
-        public HoaDonController(ShoesEcommereContext context, IMailService mailService, IConfiguration Configuration)
+        private readonly IOptions<MailSettings> mailSettings;
+        private readonly IHostingEnvironment _HostEnvironment;
+
+        public HoaDonController(ShoesEcommereContext context, IMailService mailService, IConfiguration configuration, IOptions<MailSettings> mailSettings,IHostingEnvironment hostingEnvironment)
         {
-            this.mailService = mailService;
             _context = context;
-            _configuration = Configuration;
+            this.mailService = mailService;
+            _configuration = configuration;
+            this.mailSettings = mailSettings;
+            this._HostEnvironment = hostingEnvironment;
         }
 
         private async Task<IActionResult> VNPAY(PhieuNhapXuat HoaDon)
@@ -197,6 +206,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 if(body.PhuongThucThanhToan == "COD")
                 {
                     var res = order(body);
+                   var bodyString =await new Confirm(_HostEnvironment,body).RenderBody();
+                    var mailBody = new MailRequest()
+                    {
+                        Body = bodyString.ToString(),
+                        Subject = "XÁC NHẬN ĐƠN HÀNG",
+                        ToEmail = body.DiaChiNavigation?.Email,
+                    };
+                    var mailSend = new MailService(mailSettings);
+                     mailSend.SendEmailAsync(mailBody);
+
                     return Ok(body);
                 }
                 else

@@ -31,9 +31,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Auth()
         {
-            var currentUser = GetCurrentUser();
-            //var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
-            return Ok();
+            try
+            {
+                var currentUser = GetCurrentUser();
+                //var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpGet("GetUser")]
         public async Task<IActionResult> GetUser()

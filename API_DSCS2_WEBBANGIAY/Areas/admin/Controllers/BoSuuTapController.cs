@@ -27,8 +27,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BoSuuTap>>> GetBoSuuTaps()
         {
-            var bsts = await _context.BoSuuTaps.ToListAsync();
-            return Ok(bsts);;
+            try
+            {
+                var bsts = await _context.BoSuuTaps.ToListAsync();
+                return Ok(bsts); ;
+            }
+            catch(Exception ex)
+            {
+                return NotFound();
+            }
         }
       
         // GET: api/BoSuuTap/5
@@ -54,11 +61,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(boSuuTap).State = EntityState.Modified;
+           
 
             try
             {
+                _context.Entry(boSuuTap).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {

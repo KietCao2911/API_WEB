@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using API_DSCS2_WEBBANGIAY.Models;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -9,8 +10,11 @@ namespace API_DSCS2_WEBBANGIAY.Models
 {
     public partial class ShoesEcommereContext : DbContext
     {
-        public ShoesEcommereContext()
+        public IConfiguration Configuration { get; }
+        
+        public ShoesEcommereContext(IConfiguration configuration)
         {
+            Configuration = configuration;
         }
 
         public ShoesEcommereContext(DbContextOptions<ShoesEcommereContext> options)
@@ -50,7 +54,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=DESKTOP-FQD5SBV;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
+                var connectString = Configuration.GetConnectionString("ShoesEcommere");
+                optionsBuilder.UseSqlServer(connectString);
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.EnableSensitiveDataLogging();
             }

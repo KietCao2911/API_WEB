@@ -19,7 +19,19 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             _context = context;
         }
         [HttpGet("{slug}")]
-        public async Task<IActionResult> Get(string slug, string? sort, [FromQuery(Name = "size")] string size,
+        public async Task<IActionResult> Get(string slug)
+        {
+            try
+            {
+                var bst = _context.BoSuuTaps.FirstOrDefault(x => x.Slug.Trim() == slug);
+                return Ok(bst);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);  
+            }
+        }
+        [HttpGet("{slug}/products")]
+        public async Task<IActionResult> Gets(string slug, string? sort, [FromQuery(Name = "size")] string size,
             [FromQuery(Name = "color")] string color, int pageSize, int? page, [FromQuery(Name = "category")] string category, [FromQuery(Name = "brand")] string brand, [FromQuery(Name = "s")] string s)
         {
             try

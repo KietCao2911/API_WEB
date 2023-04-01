@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="wwwroot\Templates\Confirm.cs" />
+    <Compile Include="wwwroot\Templates\Shipped.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MailKit" Version="3.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.17" />
@@ -35,6 +40,12 @@
     <Folder Include="wwwroot\res\BstImgs\" />
     <Folder Include="wwwroot\res\users\" />
     <Folder Include="wwwroot\res\SanPhamRes\Thumb\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Templates\Confirm.html" />
+    <None Include="wwwroot\Templates\Confirm1\Confirm1.html" />
+    <None Include="wwwroot\Templates\Confirm1\productsBody.html" />
   </ItemGroup>
 
 </Project>

@@ -22,9 +22,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var types = await _context.Types.ToListAsync();
-           
-            return Ok(types);
+            try
+            {
+                var types = await _context.Types.ToListAsync();
+
+                return Ok(types);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
         [HttpPost]
         public async Task<IActionResult> Post(API_DSCS2_WEBBANGIAY.Models.Type type)

@@ -26,7 +26,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? idKH { get; set; }
         public string MaChiNhanh { get; set; }
         public int? IdDiaChi { get; set; }
-        public int? TongSoLuong { get; set; }
+        public int? TongSoLuong { get; set; } = 0;
         public int? DeliveryStatus { get; set; }
         public int? status { get; set; } = 0;
         public int? steps { get; set; } = 0;

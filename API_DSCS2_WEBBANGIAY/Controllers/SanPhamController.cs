@@ -106,7 +106,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 return Ok(new
                 {
                     products= result,
-                    totalRow = products.Count(),
+                    totalRow = result.TotalPages,
                 });
             }
             catch (Exception ex)
@@ -119,22 +119,19 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             var baseURL = _configuration.GetSection("BaseURL").Value;
             var sanPham = await _context.SanPhams
-
-                      .Include(x => x.SanPhams).
-                      ThenInclude(x => x.SizeNavigation)
-                      .Include(x => x.SanPhams)
-                      .ThenInclude(x => x.MauSacNavigation)
-                       .Include(x => x.SanPhams)
-                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).
-                      Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).ThenInclude(x => x.PhieuNhapXuatNavigation)
                       .Include(x => x.SanPhams).ThenInclude(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
                        .FirstOrDefaultAsync(x => x.Slug.Trim() == slug.Trim() && x.ParentID == null);
+            var related = _context.SanPhams.Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).Where(x => x.ParentID == null&& x.MaSanPham!=sanPham.MaSanPham).Where(x=>x.IDBrand ==sanPham.IDBrand );
             if (sanPham == null)
             {
                 return NotFound();
             }
 
-            return Ok(sanPham); ; ;
+            return Ok(new
+            {
+                sanPham,
+                related,
+            }); ; ;
         }
 
     }

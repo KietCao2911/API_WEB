@@ -24,7 +24,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MauSac>>> GetMauSacs()
         {
-            return await _context.MauSacs.ToListAsync();
+            try
+            {
+                
+                return await _context.MauSacs.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // GET: api/MauSac/5
