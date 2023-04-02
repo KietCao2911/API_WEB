@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using System.IO;
-using API_DSCS2_WEBBANGIAY.BodyRequest.SanPhamController;
 using Microsoft.Extensions.Configuration;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
@@ -246,7 +245,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             catch (Exception err)
             {
-                await  trans.RollbackAsync();
+                  trans.RollbackAsync();
                 return BadRequest(err);
             }
 
@@ -454,7 +453,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }
                 catch (Exception err)
                 {
-                   await  trans.RollbackAsync();
+                     trans.RollbackAsync();
                     return BadRequest(new
                     {
                         success = false

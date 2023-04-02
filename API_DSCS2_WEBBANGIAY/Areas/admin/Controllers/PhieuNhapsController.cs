@@ -26,7 +26,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                return await _context.PhieuNhapXuats.Where(x => x.LoaiPhieu == "PHIEUNHAP").ToListAsync();
+                return await _context.PhieuNhapXuats.Where(x => x.LoaiPhieu == "PHIEUNHAP").OrderByDescending(x=>x.createdAt).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -66,6 +66,22 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
             return NoContent();
         }
+        [HttpPut("ChinhSuaPhieuNhap")]
+        public async Task<IActionResult>ChinhSua(PhieuNhapXuat body)
+        {
+            var trans = _context.Database.BeginTransaction();
+            try
+            {
+                _context.PhieuNhapXuats.Update(body);
+               await _context.SaveChangesAsync();
+                await trans.CommitAsync();
+                return Ok(body);
+            }catch(Exception ex)
+            {
+                return BadRequest();
+                trans.RollbackAsync();  
+            }
+        }
         [HttpPut("ThanhToan")]
         public async Task<IActionResult> ThanhToan(PhieuNhapXuat body)
         {
@@ -78,7 +94,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     body.steps = 4;
                     body.status = 1;
                 }
-                body.DaNhapHang = true;
+                body.DaThanhToan = true;
+                body.TienDaThanhToan = body.ThanhTien;
                 _context.Entry(body).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 await trans.CommitAsync();
@@ -87,7 +104,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             catch (Exception err)
             {
                 return BadRequest();
-                await trans.RollbackAsync();
+                 trans.RollbackAsync();
             }
         }
         [HttpPost]
@@ -134,7 +151,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 foreach(var item in body.ChiTietNhapXuats)
                 {
-                    var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham);
+                    var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham&&x.MaChiNhanh==body.MaChiNhanh);
                     
                     if(khohang is not null)
                     {
@@ -166,8 +183,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             catch(Exception err)
             {
-                await trans.RollbackAsync();
                 return BadRequest();
+                 trans.RollbackAsync();
             }
         }
         

@@ -17,6 +17,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string? LoaiPhieu { get; set; }
         public bool? DaNhapHang { get; set; } = false;
         public bool? DaThanhToan { get; set; } = false;
+        public bool? DaXuatKho { get; set; } = false;
+        public bool? DaVeKho { get; set; } = false;
         public decimal? TienDaThanhToan { get; set; }
         public decimal? TienDaGiam { get; set; }    
         public string? PhuongThucThanhToan { get; set; }
