@@ -32,23 +32,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         //        return BadRequest(ex.Message);  
         //    }
         //}
-        [HttpGet("ProductsLatesUpdate")]
-        public async Task<IActionResult> ProductsLatesUpdate(string MaChiNhanh)
-        {
 
-            try
-            {
-                var products = await _context.SanPhams
-                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
-                      .Where(x => x.ParentID == null)
-              .OrderByDescending(x => x.CreatedAt).ToListAsync();
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
         
     }
 }

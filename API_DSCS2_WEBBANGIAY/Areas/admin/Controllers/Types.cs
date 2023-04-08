@@ -1,4 +1,5 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,9 +39,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
+                type.Slug = CustomSlug.Slugify(type.Name);
                 _context.Types.Add(type);
                 await _context.SaveChangesAsync();
-                
                 return Ok(type);
             }catch(Exception err)
             {

@@ -13,6 +13,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
         public int ID { get; set; }
         public string Name { get; set; }    
+        public string Slug { get; set; }    
         public DateTime createdAT { get; set; } = DateTime.Now; 
         public DateTime updatedAT { get; set; } = DateTime.Now;
         public virtual ICollection<SanPham> SanPhams { get; set; }

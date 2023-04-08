@@ -81,6 +81,65 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 redirect=paymentUrl,
             });
         }
+        private decimal CouponVerify(decimal thanhTien,string MaCoupon)
+        {
+            try
+            {
+                var coupon = _context.Coupons.FirstOrDefault(x=>x.MaCoupon == MaCoupon);
+                if(coupon==null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    //0 = % : 1 = giá trị
+                    if(coupon.KieuGiaTri)
+                    {
+                        //gia tri
+                        return coupon.GiaTri;
+                    }
+                    else
+                    {
+                        //%
+                        if(coupon.GiaTri<100&&coupon.GiaTri>0)
+                        {
+                            var temp = thanhTien * (coupon.GiaTri / 100);
+                            return temp;
+                        }
+                        return 0;
+                    }
+                }
+            }catch (Exception ex)
+            {
+                return 0;
+            }
+        }
+        private bool CheckQTY(PhieuNhapXuat body)
+        {
+            try
+            {
+                foreach(var k in body.ChiTietNhapXuats)
+                {
+                    var kh = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == k.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
+                    if(kh != null)
+                    {
+                        if(kh.SoLuongTon-k.SoLuong<0||kh.SoLuongCoTheban-k.SoLuong<0)
+                        {
+                            return false;
+                        }
+                        
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }catch(Exception err)
+            {
+                return false;
+            }
+        }
         [HttpGet("Coupon")]
         public async Task<IActionResult> GetCoupons()
         {
@@ -203,7 +262,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             try
             {
-                if(body.PhuongThucThanhToan == "COD")
+
+                if (CheckQTY(body) == false)
+                {
+                    return BadRequest("Số lượng trong kho không cho phép");
+                }
+                if(body.CouponCode is not null)
+                {
+                    body.ThanhTien= CouponVerify((decimal)body.ThanhTien, body.CouponCode);  
+                }
+                if (body.PhuongThucThanhToan == "COD")
                 {
                     var res = order(body);
                    var bodyString =await new Confirm(_HostEnvironment,body).RenderBody();
@@ -218,11 +286,15 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
 
                     return Ok(body);
                 }
-                else
+                else if(body.PhuongThucThanhToan=="VNPAY")
                 {
                     var hoadon = order(body);
                     await _context.SaveChangesAsync();
                     return await VNPAY(hoadon);
+                }
+                else
+                {
+                    return NotFound();
                 }
             }
             catch (Exception ex)

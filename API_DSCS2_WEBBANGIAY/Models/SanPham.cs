@@ -19,6 +19,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
             ChiTietNhapXuats= new HashSet<ChiTietNhapXuat>();
             ChiTietCoupons = new HashSet<ChiTietCoupon>();
             ChiTietBSTs = new HashSet<ChiTietBST>();
+            ChiTietKhuyenMais = new HashSet<ChiTietKhuyenMai>();
+            StarReviewDetails = new HashSet<StarReviewDetail>();
         }
 
         //public string MaSanPham { get; set; }
@@ -26,8 +28,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string MaSanPham { get; set; }
         public string TenSanPham { get; set; }
         public string? ParentID { get; set; }
-        public string Slug { get; set; }
-        public int? GiamGia { get; set; }
+        public string Slug { get; set; } = "";
+        public int? GiamGia { get; set; }=0;    
+        public decimal? TienDaGiam { get; set; }=0;    
+        public bool? isSale { get; set; }=false;    
         public decimal? GiaNhap { set; get; } = 0;
         public decimal? GiaBanLe { set; get; } = 0;
         public decimal? GiaBanSi { set; get; } = 0;
@@ -35,7 +39,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? SoLuongCoTheban { set; get; } = 0;
         public int? SoLuongDaBan { set; get; } = 0;
         public decimal? GiaVon { set; get; } = 0;
-        public string? Mota { get; set; }
+        public string? Mota { get; set; } = "";
+        public int? ViewCount { get; set; } = 0;
         public string? MotaChiTiet { get; set; }
         public int? IDType { get; set; } = null;
         public int? IDBrand { get; set; } = null;
@@ -62,6 +67,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }
         public virtual ICollection<ChiTietCoupon> ChiTietCoupons{ get; set; }
         public virtual ICollection<ChiTietBST> ChiTietBSTs { get; set; }
+        public virtual ICollection<ChiTietKhuyenMai> ChiTietKhuyenMais { get; set; }
+        public virtual ICollection<StarReviewDetail> StarReviewDetails { get; set; }
         public string VND(decimal money)
         {
             var format = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");

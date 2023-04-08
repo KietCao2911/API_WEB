@@ -15,8 +15,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int Id { get; set; }
         public string Slug { get; set; }
         public string TenDanhMuc { get; set; }
-        public int? GioiTinhCode { get; set; }
         public int? ParentCategoryID { get; set; }
+        public int? ViewCount { get; set; } = 0;
         public virtual ICollection<DanhMucDetails> DanhMucDetails { get; set; }
     }
 }

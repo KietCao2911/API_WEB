@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230407133009_addFieldThanhTienTblGiamGia")]
+    partial class addFieldThanhTienTblGiamGia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,8 +231,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("maSanPham")
                         .HasColumnType("char(10)");
 
-                    b.Property<int>("IDDotKhuyenMai")
-                        .HasColumnType("int");
+                    b.Property<string>("maDotKhuyenMai")
+                        .HasColumnType("char(10)");
 
                     b.Property<decimal?>("GiaTri")
                         .HasColumnType("decimal(18,2)");
@@ -241,9 +243,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<decimal?>("ThanhTien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("maSanPham", "IDDotKhuyenMai");
+                    b.HasKey("maSanPham", "maDotKhuyenMai");
 
-                    b.HasIndex("IDDotKhuyenMai");
+                    b.HasIndex("maDotKhuyenMai");
 
                     b.ToTable("ChiTietKhuyenMais");
                 });
@@ -500,10 +502,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.KhuyenMai", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<string>("MaDotKhuyenMai")
+                        .HasColumnType("char(10)");
 
                     b.Property<decimal?>("GiaTriGiamGia")
                         .HasColumnType("decimal(18,2)");
@@ -526,7 +526,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<int?>("TrangThai")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("MaDotKhuyenMai");
 
                     b.ToTable("KhuyenMais");
                 });
@@ -1205,7 +1205,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                 {
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.KhuyenMai", "KhuyenMaiNavigation")
                         .WithMany("ChiTietKhuyenMais")
-                        .HasForeignKey("IDDotKhuyenMai")
+                        .HasForeignKey("maDotKhuyenMai")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

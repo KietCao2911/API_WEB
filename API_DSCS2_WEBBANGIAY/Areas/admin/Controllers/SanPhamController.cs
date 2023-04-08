@@ -28,18 +28,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         // GET: api/SanPham
         [HttpGet]
 
-        public async Task<ActionResult> GetSanPhams(string? sort, int pageSize, int? page, [FromQuery(Name = "s")]  string s)
+        public async Task<ActionResult> GetSanPhams(string? sort, int pageSize, int? page, [FromQuery(Name = "s")] string s)
         {
 
             try
             {
-                pageSize = pageSize == 0 ? 20: pageSize;
+                pageSize = pageSize == 0 ? 20 : pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 products = _context.SanPhams.
                       Include(x => x.ChiTietHinhAnhs).
                       ThenInclude(x => x.IdHinhAnhNavigation)
-                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
-                      .Where(x => x.ParentID == null).OrderBy(x=>x.CreatedAt);
+                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
+                      .Where(x => x.ParentID == null).OrderBy(x => x.CreatedAt);
                 if (s is not null && s.Length > 0)
                 {
                     products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
@@ -63,7 +63,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var select = result.Select(x => new
                 {
                     Id = x?.Id,
-                    MaSanPham=x.MaSanPham.Trim(),
+                    MaSanPham = x.MaSanPham.Trim(),
                     TenSanPham = x?.TenSanPham.Trim(),
                     GiaBan = x?.GiaBanLe,
                     GiamGia = x?.GiamGia,
@@ -86,45 +86,46 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     SizeNavigation = x?.SizeNavigation,
                     IDType = x?.IDType,
                     IDBrand = x?.IDBrand,
-                    SanPhams= x.SanPhams,
-                    
+                    SanPhams = x.SanPhams,
+
                 }); ; ;
                 return Ok(new
                 {
-                    products=select.Take(pageSize),
+                    products = select.Take(pageSize),
                     totalRow = products.Count(),
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex);
             }
         }
-
+        [HttpGet("GetCTNX/{maSanPham}")]
+        public async Task<IActionResult> GetCTNX(string maSanPham)
+        {
+            try
+            {
+                var ctnxs = _context.ChiTietNhapXuats.Include(x=>x.PhieuNhapXuatNavigation).ThenInclude(x=>x.KhoHangNavigation).Where(x => x.MaSanPham == maSanPham);
+                return Ok(ctnxs);
+            }
+            catch(Exception err)
+            {
+                return NotFound();
+            }
+        }
         // GET: api/SanPham/5
-        [HttpGet]
-        [Route("san-pham/{slug}")]
-        public async Task<ActionResult<SanPham>> GetSanPham(string slug)
+        [HttpGet("{maSanPham}")]
+        public async Task<ActionResult<SanPham>> GetSanPham(string maSanPham)
         {
             var sanPham = await _context.SanPhams
-
-                      .Include(x => x.SanPhams).
-                      ThenInclude(x=>x.SizeNavigation)
-                      .Include(x=>x.DanhMucDetails)
                       .Include(x => x.SanPhams)
-                      .ThenInclude(x => x.MauSacNavigation)
-                       .Include(x => x.SanPhams)
-                       .ThenInclude(x=>x.KhoHangs).ThenInclude(x=>x.BranchNavigation)
-                      .Include(x => x.SanPhams).ThenInclude(x=>x.ChiTietNhapXuats).
-                      Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).ThenInclude(x=>x.PhieuNhapXuatNavigation).
+                      .Include(x=>x.DanhMucDetails).                             
                       Include(x => x.SanPhams)
                        .ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                        .Include(x => x.VatNavigation)
                       .Include(x => x.TypeNavigation)
-                      .Include(x => x.BrandNavigation).
-                       Include(x => x.ChiTietHinhAnhs)
-                       .ThenInclude(x => x.IdHinhAnhNavigation)
-                       .FirstOrDefaultAsync(x=>x.Slug.Trim()==slug.Trim()&&x.ParentID==null);
+                      .Include(x => x.BrandNavigation)
+                       .FirstOrDefaultAsync(x=>x.MaSanPham==maSanPham&&x.ParentID==null);
             if (sanPham == null)
             {
                 return NotFound();
@@ -440,7 +441,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                 uid= anh.Id,
                                 name = anh.FileName,
                                 status="done",
-                                url = baseURL + "\\wwwroot\\res\\SanPhamRes\\Imgs\\" + maSP.Trim() + "\\" + MaMau.Trim() + "\\" +anh.FileName.Trim()
+                                url = baseURL + "wwwroot\\res\\SanPhamRes\\Imgs\\" + maSP.Trim() + "\\" + MaMau.Trim() + "\\" +anh.FileName.Trim()
 
                             });;
                         }

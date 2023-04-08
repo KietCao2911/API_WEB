@@ -23,7 +23,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
         }
         public virtual DbSet<DiaChi> DiaChis { get; set; }
         public virtual DbSet<BoSuuTap> BoSuuTaps { get; set; }
-        //public virtual DbSet<ChiTietSale> ChiTietSales { get; set; }
         public virtual DbSet<DanhMuc> DanhMucs { get; set; }
         public virtual DbSet<HinhAnh> HinhAnhs { get; set; }
         public virtual DbSet<ChiTietHinhAnh> ChiTietHinhAnhs { get; set; }
@@ -48,6 +47,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<Coupon> Coupons { get; set; }
         public virtual DbSet<ChiTietCoupon> ChiTietCoupons { get; set; }
         public virtual DbSet<ChiTietBST> ChiTietBSTs { get; set; }
+        public virtual DbSet<KhuyenMai> KhuyenMais { get; set; }
+        public virtual DbSet<ChiTietKhuyenMai> ChiTietKhuyenMais { get; set; }
+        public virtual DbSet<StarReviewDetail> StarReviewDetails { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -64,13 +66,31 @@ namespace API_DSCS2_WEBBANGIAY.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+            modelBuilder.Entity<StarReviewDetail>(entity =>
+            {
 
-            //modelBuilder.Entity<Role>(entity =>
-            //{
-            //    entity.HasKey(e => e.Id);
-            //    entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            //    entity.Property(e => e.RoleName).HasColumnType("nvarchar(30)");
-            //});
+                entity.HasKey(e => new { e.MaSanPham, e.StarReviewID });
+                entity.HasOne(e => e.MasanPhamNavigation).WithMany(x => x.StarReviewDetails).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.ReviewStarNavigation).WithMany(x => x.StarReviewDetails).HasForeignKey(x => x.StarReviewID).OnDelete(DeleteBehavior.Cascade); ;
+
+            });
+            modelBuilder.Entity<ChiTietKhuyenMai>(entity =>
+            {
+
+                entity.HasKey(e => new { e.maSanPham, e.IDDotKhuyenMai });
+                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietKhuyenMais).HasForeignKey(x => x.maSanPham).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.KhuyenMaiNavigation).WithMany(x => x.ChiTietKhuyenMais).HasForeignKey(x => x.IDDotKhuyenMai).OnDelete(DeleteBehavior.Cascade);
+
+            });
+            modelBuilder.Entity<KhuyenMai>(entity =>
+            {
+
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.Property(e => e.MoTa).HasColumnType("ntext");
+
+
+            });
             modelBuilder.Entity<ChiTietBST>(entity =>
             {
 
@@ -168,6 +188,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.HasKey(e =>e.ID);
                 entity.Property(e=>e.ID).ValueGeneratedOnAdd();
                 entity.Property(e=>e.Name).HasColumnType("nvarchar(50)");
+                entity.Property(e=>e.Slug).HasColumnType("char(50)");
             });
             modelBuilder.Entity<Brand>(entity =>
             {
@@ -268,7 +289,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             {
                 entity.ToTable("DanhMuc");
 
-                entity.HasIndex(e => e.GioiTinhCode, "IX_DanhMuc_GioiTinh_Code");
+               
 
                 entity.Property(e => e.Id).HasColumnName("_id");
 
@@ -419,7 +440,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             {
                 entity.ToTable("reviewStar");
 
-                entity.HasIndex(e => e.MaSanPham, "IX_reviewStar_MasanPham");
+             
 
                 entity.Property(e => e.Id).HasColumnName("_id");
 
@@ -439,10 +460,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasColumnName("hai_sao")
                     .HasDefaultValueSql("((0))");
 
-                entity.Property(e => e.MaSanPham)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
+              
 
                 entity.Property(e => e.MotSao)
                     .HasColumnName("mot_sao")
@@ -452,11 +470,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasColumnName("nam_sao")
                     .HasDefaultValueSql("((0))");
 
-                entity.HasOne(d => d.MasanPhamNavigation)
-                    .WithMany(p => p.ReviewStars)
-                    .HasForeignKey(d => d.MaSanPham)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("fk_reviewStar_sanpham");
+           
             });
 
             modelBuilder.Entity<Sale>(entity =>

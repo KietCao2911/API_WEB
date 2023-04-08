@@ -12,12 +12,13 @@ namespace API_DSCS2_WEBBANGIAY.Models
         }
 
         public string MaCoupon { get; set; }
-        public string TenCoupon { get; set; }
+        public string TenCoupon { get; set; } = "";
         public DateTime NgayBatDau { get; set; }
         public DateTime NgayKetThuc { get; set; }
-        public int SoLanDung { get; set; }
-        public decimal GiaTri { get; set; }
-        public string MoTa { get; set; }
+        public int SoLanDung { get; set; } = 0;
+        public decimal GiaTri { get; set; } = 0;
+        public bool KieuGiaTri { get; set; } = false;
+        public string MoTa { get; set; } = "";
         public virtual ICollection<PhieuNhapXuat> PhieuNhapXuats { get; set; }
         public virtual ICollection<ChiTietCoupon> ChiTietCoupons { get; set; }
 

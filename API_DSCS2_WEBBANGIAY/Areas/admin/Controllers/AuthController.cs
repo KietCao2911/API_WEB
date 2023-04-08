@@ -15,7 +15,8 @@ using System.Threading.Tasks;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("admin")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {

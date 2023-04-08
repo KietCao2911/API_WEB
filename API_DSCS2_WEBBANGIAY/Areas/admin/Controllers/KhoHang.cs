@@ -24,7 +24,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var khohangs = _context.KhoHangs.Include(x=>x.BranchNavigation).FirstOrDefault(x => x.MaSanPham == id);
+                var khohangs = _context.KhoHangs.Include(x=>x.BranchNavigation).ThenInclude(x=>x.PhieuNhapXuats).Where(x => x.MaSanPham == id);
                 return Ok(khohangs);
             }
             catch(Exception err)
