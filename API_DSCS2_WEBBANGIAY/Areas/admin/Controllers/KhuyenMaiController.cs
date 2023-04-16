@@ -37,7 +37,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var km = _context.KhuyenMais.Include(x=>x.ChiTietKhuyenMais).FirstOrDefault(x => x.ID == ID);
+                var km = _context.KhuyenMais.Include(x=>x.ChiTietKhuyenMais).ThenInclude(x=>x.SanPhamNavigation).FirstOrDefault(x => x.ID == ID);
                 return Ok(km);
             }
             catch (Exception err)
@@ -96,6 +96,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var trans = _context.Database.BeginTransaction();
             try
             {
+                DateTime now = DateTime.Now;
+                if (body.NgayKetThuc <= now)
+                {
+                    return BadRequest();
+                }
                 foreach (var item in body.ChiTietKhuyenMais)
                 {
                     var product = _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefault(x => x.MaSanPham == item.maSanPham);
@@ -104,7 +109,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         foreach(var proc in product.SanPhams)
                         {
                             proc.isSale = true;
-                            proc.TienDaGiam += item.ThanhTien;
+                            proc.TienDaGiam = item.ThanhTien;
                             proc.GiaBanLe-=item.ThanhTien;
                             _context.Entry(proc).State = EntityState.Modified;
                         }
@@ -114,6 +119,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         _context.Entry(product).State = EntityState.Modified;
                     }
                 }
+                body.TrangThai = 1;
+                _context.Entry(body).State = EntityState.Modified;
                 _context.SaveChanges();
                 trans.Commit();
                 return Ok(body);
@@ -130,17 +137,27 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var trans = _context.Database.BeginTransaction();
             try
             {
+               
                 foreach (var item in body.ChiTietKhuyenMais)
                 {
-                    var product = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.maSanPham);
+                    var product = _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefault(x => x.MaSanPham == item.maSanPham);
                     if (product != null)
                     {
+                        foreach (var proc in product.SanPhams)
+                        {
+                            proc.isSale = false;
+                            proc.GiaBanLe += proc.TienDaGiam;
+                            proc.TienDaGiam = 0;
+                            _context.Entry(proc).State = EntityState.Modified;
+                        }
                         product.isSale = false;
-                        product.TienDaGiam -=item.ThanhTien;
-                        product.GiaBanLe -= product.TienDaGiam;
+                        product.GiaBanLe += product.TienDaGiam;
+                        product.TienDaGiam =0;
                         _context.Entry(product).State = EntityState.Modified;
                     }
                 }
+                body.TrangThai = -1;
+                _context.Entry(body).State = EntityState.Modified;
                 _context.SaveChanges();
                 trans.Commit();
                 return Ok(body);

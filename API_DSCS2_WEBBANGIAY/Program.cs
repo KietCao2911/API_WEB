@@ -20,6 +20,7 @@ namespace API_DSCS2_WEBBANGIAY
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                   
                     webBuilder.UseStartup<Startup>();
                 });
     }

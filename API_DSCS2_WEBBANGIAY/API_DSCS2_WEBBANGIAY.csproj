@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="wwwroot\Templates\Confirm.cs" />
-    <Compile Include="wwwroot\Templates\Shipped.cs" />
+    <Content Include="Utils\Mail\TemplateHandle\Confirm.cs" />
+    <Content Include="Utils\Mail\TemplateHandle\EmailVerify.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,7 +44,6 @@
 
   <ItemGroup>
     <None Include="wwwroot\Templates\Confirm.html" />
-    <None Include="wwwroot\Templates\Confirm1\Confirm1.html" />
     <None Include="wwwroot\Templates\Confirm1\productsBody.html" />
   </ItemGroup>
 

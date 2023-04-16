@@ -32,7 +32,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.me.Controllers
         {
             try
             {
-                var hds = _context.PhieuNhapXuats.Include(x => x.ChiTietNhapXuats);
+                var hds = _context.PhieuNhapXuats.Where(x=>x.idTaiKhoan==tenTaiKhoan).Include(x=>x.DiaChiNavigation).Include(x => x.ChiTietNhapXuats).ThenInclude(x=>x.SanPhamNavigation);
                   
                 return Ok(hds);
             }catch(Exception err)

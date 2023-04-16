@@ -9,7 +9,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             RoleDetails = new HashSet<RoleDetails>();
         }
-        public int Id { get; set; }
+        public string RoleCode { get; set; }
         public string RoleName { get; set; }
         public virtual ICollection<RoleDetails> RoleDetails { get; set; }
     }

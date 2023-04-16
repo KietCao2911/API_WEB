@@ -28,7 +28,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         // GET: api/SanPham
         [HttpGet]
 
-        public async Task<ActionResult> GetSanPhams(string? sort, int pageSize, int? page, [FromQuery(Name = "s")] string s)
+        public async Task<ActionResult> GetSanPhams([FromQuery(Name = "sort")] string? sort,[FromQuery(Name = "pageSize")] int pageSize,
+            [FromQuery(Name = "page")] int? page, [FromQuery(Name = "s")] string s, [FromQuery(Name = "type")] string type, [FromQuery(Name = "brand")] string brand)
         {
 
             try
@@ -37,12 +38,20 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 products = _context.SanPhams.
                       Include(x => x.ChiTietHinhAnhs).
-                      ThenInclude(x => x.IdHinhAnhNavigation)
+                      ThenInclude(x => x.IdHinhAnhNavigation).Include(x => x.TypeNavigation).Include(x => x.BrandNavigation)
                       .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                       .Where(x => x.ParentID == null).OrderBy(x => x.CreatedAt);
                 if (s is not null && s.Length > 0)
                 {
                     products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
+                }
+                if (type is not null && type.Length > 0)
+                {
+                    products = products.Where(x => x.TypeNavigation.Slug == type);
+                }
+                if (brand is not null && brand.Length > 0)
+                {
+                    products = products.Where(x => x.BrandNavigation.Slug.Trim().ToLower() == brand);
                 }
                 switch (sort)
                 {

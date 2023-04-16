@@ -1,7 +1,7 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using API_DSCS2_WEBBANGIAY.Utils.Mail;
-using API_DSCS2_WEBBANGIAY.Utils.Mail.Templates;
+using API_DSCS2_WEBBANGIAY.Utils.Mail.TemplateHandle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -248,7 +248,10 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 }
 
                 _context.Entry(body).State = EntityState.Added;
-                _context.Entry(body.DiaChiNavigation).State = EntityState.Added;
+                if(body.IdDiaChi is  null)
+                {
+                    _context.Entry(body.DiaChiNavigation).State = EntityState.Added;
+                }
                 _context.SaveChanges();
                 return body;
             }

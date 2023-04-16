@@ -32,16 +32,32 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return BadRequest(err);
             }
         }
-        [HttpGet("GetProducts/{maChiNhanh}")]
-        public async Task<IActionResult> GetProducts(string maChiNhanh, [FromQuery(Name = "s")] string s)
+        [HttpGet("GetProducts")]
+        public async Task<IActionResult> GetProducts( [FromQuery(Name = "s")] string s, [FromQuery(Name = "OnlyVersion")] bool OnlyVersion,[FromQuery(Name = "maChiNhanh")] string maChiNhanh)
         {
             try
             {
-                if (maChiNhanh == null)
+               
+                IQueryable<ChiNhanh_SanPham> products = Enumerable.Empty<ChiNhanh_SanPham>().AsQueryable();
+                if (maChiNhanh is not null && maChiNhanh.Length>0)
                 {
-                    maChiNhanh = "CN01";
+                 products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).Where(x=>x.MaChiNhanh.Trim()==maChiNhanh);
+                    
                 }
-                var products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).Where(x => x.MaChiNhanh.Trim() == maChiNhanh.Trim() && x.SanPhamNavigation.ParentID != null);
+                else
+                {
+
+                    products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation);
+                }
+                if (OnlyVersion)
+                {
+
+                products = products.Where(x=> x.SanPhamNavigation.ParentID != null);
+                }
+                else
+                {
+                    products = products.Where(x=> x.SanPhamNavigation.ParentID == null);
+                }
                 if (s is not null && s.Length > 0)
                 {
                     products = products.Where(x => x.SanPhamNavigation.TenSanPham.Trim().Contains(s.Trim()));

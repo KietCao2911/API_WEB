@@ -34,7 +34,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? steps { get; set; } = 0;
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
-        public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
+        //public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
         public virtual Coupon CouponNavigation { get; set; }
         public virtual DiaChi DiaChiNavigation { get; set; }
         public virtual KhachHang KhachHangNavigation { get; set; }

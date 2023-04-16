@@ -44,13 +44,22 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
           
         }
         [HttpGet("GetAllDanhMuc")]
-        public async Task<IActionResult> GetAllDanhMuc()
+        public async Task<IActionResult> GetAllDanhMuc([FromQuery(Name = "order")] string order)
         {
             try
             {
-                var danhmucs = await _context.DanhMucs.ToListAsync();
-                if(danhmucs is not null && danhmucs.Count > 0)
+                IQueryable<DanhMuc> danhmucs = Enumerable.Empty<DanhMuc>().AsQueryable();
+                 danhmucs =  _context.DanhMucs;
+                if(danhmucs is not null && danhmucs.Count() > 0)
                 {
+                    switch (order)
+                    {
+                        case "most-view":
+                            danhmucs =danhmucs.OrderByDescending(x => x.ViewCount).Take(8);
+                            break;
+                        default:
+                            break;
+                    }
                     return Ok(danhmucs);
 
                 }
@@ -74,7 +83,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 return NotFound();
             }
-
+          
             return Ok(danhMuc);
         }
 

@@ -19,7 +19,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var messages = _context.Messages.Include(x=>x.userNavigation);
+            var messages = _context.Messages/*.Include(x=>x.userNavigation)*/;
             return Ok(messages);
         }
     }

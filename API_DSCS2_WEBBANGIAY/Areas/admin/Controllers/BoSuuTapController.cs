@@ -107,16 +107,25 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBoSuuTap(int id)
         {
-            var boSuuTap = await _context.BoSuuTaps.FindAsync(id);
-            if (boSuuTap == null)
+            try
             {
-                return NotFound();
+                var boSuuTap = await _context.BoSuuTaps.FindAsync(id);
+                if (boSuuTap == null)
+                {
+                    return NotFound();
+                }
+                    _context.BoSuuTaps.Remove(boSuuTap);
+                    await _context.SaveChangesAsync();
+                if (!handleDeleteImg(boSuuTap.Img, boSuuTap.Id))
+                {
+                    return Ok();
+                }
+                return BadRequest();
             }
-
-            _context.BoSuuTaps.Remove(boSuuTap);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch(Exception err)
+            {
+                return BadRequest();
+            }
         }
         [HttpPost("UploadImgBST/{Id}")]
         public async Task<IActionResult> UploadImgBST(IFormFile file, int Id)
@@ -174,6 +183,33 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
 
             return BadRequest();
+        }
+        private bool handleDeleteImg(string FileName,int Id)
+        {
+            if (FileName != null)
+            {
+                var path = Path.Combine(
+                Directory.GetCurrentDirectory(), "wwwroot//res//BstImgs",
+                FileName);
+
+                FileInfo file = new FileInfo(path);
+                try
+                {
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                        return true;
+
+                    }
+                    return false;
+                }
+                catch (Exception err)
+                {
+                    return false;
+                }
+
+            }
+            return false;
         }
         [HttpDelete("RemoveImgBST/{id}")]
         public async Task<IActionResult> RemoveImgBST(string fileName,int id)

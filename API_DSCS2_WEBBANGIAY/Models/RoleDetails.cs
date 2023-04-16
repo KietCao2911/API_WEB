@@ -3,10 +3,9 @@
     public partial class RoleDetails
     {
 
-        public int Id { get; set; }
         public string TenTaiKhoan { get; set; }
-        public int IdRole { get; set; }
-        //public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
+        public string RoleCode { get; set; }
+        public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
         public virtual Role IdRoleNavigation { get; set; }
          
     }

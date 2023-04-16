@@ -23,12 +23,27 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/DonHang
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetHoaDons()
+        public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetHoaDons([FromQuery(Name = "status")] string status)
         {
             try
             {
-                var hoadons = _context.PhieuNhapXuats.Include(x => x.DiaChiNavigation).Include(x => x.KhachHangNavigation).Where(x=>x.LoaiPhieu=="PHIEUXUAT").OrderByDescending(x=>x.createdAt);
-                return Ok(hoadons);
+                IQueryable<PhieuNhapXuat> phieuxuats = Enumerable.Empty<PhieuNhapXuat>().AsQueryable();
+                phieuxuats = _context.PhieuNhapXuats.Include(x => x.ChiTietNhapXuats)
+                    .ThenInclude(x => x.SanPhamNavigation).Include(x => x.DiaChiNavigation).Where(x=> x.LoaiPhieu == "PHIEUXUAT");
+                switch (status)
+                {
+                    case "DaHuy":
+                        phieuxuats = phieuxuats.Where(x => x.status == -1);
+                        break;
+                    case "HoanThanh":
+                        phieuxuats = phieuxuats.Where(x => x.status == 1);
+                        break;
+                    default:
+                        phieuxuats = phieuxuats.Where(x => x.status == 0);
+                        break;
+
+                }
+                return Ok(phieuxuats);
             }catch (Exception ex)
             {
                 return BadRequest(ex.Message);  
@@ -187,7 +202,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 if ((bool)!body.DaThanhToan)
                 {
-                    return BadRequest();
+                    return BadRequest("Không thể hoàn tiền khi chưa thanh toán");
                 }
                 body.TienDaThanhToan -= body.ThanhTien;
                 PhieuNhapXuat phieuChi = new PhieuNhapXuat();
@@ -198,6 +213,35 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 _context.PhieuNhapXuats.Add(phieuChi);
                 await _context.SaveChangesAsync();
                 return Ok(body);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> PutHoaDon(PhieuNhapXuat body)
+        {
+            try
+            {
+                _context.Entry(body).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok(body);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPut("HuyDon")]
+        public async Task<IActionResult> HuyDon(PhieuNhapXuat body )
+        {
+            try
+            {
+                body.status = -1;
+                _context.Entry(body).State = EntityState.Modified;
+                _context.SaveChanges();
+                return Ok(body); 
             }
             catch (Exception ex)
             {

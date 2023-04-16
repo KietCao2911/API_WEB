@@ -408,7 +408,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenTaiKhoan")
-                        .HasColumnType("char(20)");
+                        .HasColumnType("char(50)");
 
                     b.Property<int?>("WardID")
                         .HasColumnType("int");
@@ -587,7 +587,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("creatorID")
-                        .HasColumnType("char(20)");
+                        .HasColumnType("char(50)");
 
                     b.HasKey("ID");
 
@@ -676,6 +676,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("PhuongThucThanhToan")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TaiKhoanTenTaiKhoan")
+                        .HasColumnType("char(50)");
+
                     b.Property<decimal?>("ThanhTien")
                         .HasColumnType("decimal(18,2)");
 
@@ -697,7 +700,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("idTaiKhoan")
-                        .HasColumnType("char(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("status")
                         .HasColumnType("int");
@@ -722,7 +725,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.HasIndex("MaChiNhanh");
 
-                    b.HasIndex("idTaiKhoan");
+                    b.HasIndex("TaiKhoanTenTaiKhoan");
 
                     b.ToTable("PhieuNhapXuats");
                 });
@@ -784,6 +787,34 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.ToTable("reviewStar");
                 });
 
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Role", b =>
+                {
+                    b.Property<string>("RoleCode")
+                        .HasColumnType("char(15)");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RoleCode");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleDetails", b =>
+                {
+                    b.Property<string>("RoleCode")
+                        .HasColumnType("char(15)");
+
+                    b.Property<string>("TenTaiKhoan")
+                        .HasColumnType("char(50)");
+
+                    b.HasKey("RoleCode", "TenTaiKhoan");
+
+                    b.HasIndex("TenTaiKhoan");
+
+                    b.ToTable("RoleDetails");
+                });
+
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoomMessage", b =>
                 {
                     b.Property<int>("MessageID")
@@ -793,7 +824,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("char(10)");
 
                     b.Property<string>("UserID")
-                        .HasColumnType("char(20)");
+                        .HasColumnType("char(50)");
 
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -1001,9 +1032,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", b =>
                 {
                     b.Property<string>("TenTaiKhoan")
-                        .HasMaxLength(20)
+                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("char(20)")
+                        .HasColumnType("char(50)")
                         .IsFixedLength(true);
 
                     b.Property<string>("Avatar")
@@ -1046,8 +1077,10 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("int")
                         .IsFixedLength(true);
 
-                    b.HasKey("TenTaiKhoan")
-                        .HasName("pk_TK");
+                    b.Property<bool?>("isActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("TenTaiKhoan");
 
                     b.HasIndex("idKH");
 
@@ -1328,10 +1361,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasForeignKey("MaChiNhanh")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", "TenTaiKhoanNavigation")
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", null)
                         .WithMany("PhieuNhapXuats")
-                        .HasForeignKey("idTaiKhoan")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("TaiKhoanTenTaiKhoan");
 
                     b.Navigation("CouponNavigation");
 
@@ -1344,8 +1376,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("LoaiPhieuNavigation");
 
                     b.Navigation("NhaCungCapNavigation");
-
-                    b.Navigation("TenTaiKhoanNavigation");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ReviewStar", b =>
@@ -1353,6 +1383,25 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.SanPham", null)
                         .WithMany("ReviewStars")
                         .HasForeignKey("SanPhamMaSanPham");
+                });
+
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleDetails", b =>
+                {
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.Role", "IdRoleNavigation")
+                        .WithMany("RoleDetails")
+                        .HasForeignKey("RoleCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", "TenTaiKhoanNavigation")
+                        .WithMany("RoleDetails")
+                        .HasForeignKey("TenTaiKhoan")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IdRoleNavigation");
+
+                    b.Navigation("TenTaiKhoanNavigation");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoomMessage", b =>
@@ -1552,6 +1601,11 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("StarReviewDetails");
                 });
 
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Role", b =>
+                {
+                    b.Navigation("RoleDetails");
+                });
+
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SanPham", b =>
                 {
                     b.Navigation("ChiTietBSTs");
@@ -1589,6 +1643,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("Messages");
 
                     b.Navigation("PhieuNhapXuats");
+
+                    b.Navigation("RoleDetails");
 
                     b.Navigation("RoomMessages");
                 });
