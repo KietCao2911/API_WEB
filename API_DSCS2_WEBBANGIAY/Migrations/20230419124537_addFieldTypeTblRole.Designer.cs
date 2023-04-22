@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230419124537_addFieldTypeTblRole")]
+    partial class addFieldTypeTblRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +54,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("TenBoSuuTap")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -801,14 +800,11 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("RoleCode")
                         .HasColumnType("char(15)");
 
-                    b.Property<string>("RoleDsc")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RoleName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("Type")
+                        .HasColumnType("bit");
 
                     b.HasKey("RoleCode");
 
@@ -820,33 +816,14 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("RoleCode")
                         .HasColumnType("char(15)");
 
-                    b.Property<string>("RoleGroup")
-                        .HasColumnType("char(20)");
+                    b.Property<string>("TenTaiKhoan")
+                        .HasColumnType("char(50)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("RoleCode", "TenTaiKhoan");
 
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
-
-                    b.HasKey("RoleCode", "RoleGroup");
-
-                    b.HasIndex("RoleGroup");
+                    b.HasIndex("TenTaiKhoan");
 
                     b.ToTable("RoleDetails");
-                });
-
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleGroup", b =>
-                {
-                    b.Property<string>("GroupName")
-                        .HasColumnType("char(20)");
-
-                    b.Property<string>("GroupDsc")
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("GroupName");
-
-                    b.ToTable("RoleGroup");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoomMessage", b =>
@@ -1094,9 +1071,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<string>("RoleGroup")
-                        .HasColumnType("char(20)");
-
                     b.Property<string>("TenHienThi")
                         .HasColumnType("nvarchar(50)");
 
@@ -1117,12 +1091,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<bool?>("isActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("isBlocked")
-                        .HasColumnType("bit");
-
                     b.HasKey("TenTaiKhoan");
-
-                    b.HasIndex("RoleGroup");
 
                     b.HasIndex("idKH");
 
@@ -1438,15 +1407,15 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.RoleGroup", "RoleGroupNavigation")
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", "TenTaiKhoanNavigation")
                         .WithMany("RoleDetails")
-                        .HasForeignKey("RoleGroup")
+                        .HasForeignKey("TenTaiKhoan")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("IdRoleNavigation");
 
-                    b.Navigation("RoleGroupNavigation");
+                    b.Navigation("TenTaiKhoanNavigation");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoomMessage", b =>
@@ -1546,18 +1515,11 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", b =>
                 {
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.RoleGroup", "RoleGroupNavigation")
-                        .WithMany("TaiKhoans")
-                        .HasForeignKey("RoleGroup")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.KhachHang", "SdtKhNavigation")
                         .WithMany("TaiKhoans")
                         .HasForeignKey("idKH")
                         .HasConstraintName("fk_TaiKhoan_KH")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("RoleGroupNavigation");
 
                     b.Navigation("SdtKhNavigation");
                 });
@@ -1658,13 +1620,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("RoleDetails");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleGroup", b =>
-                {
-                    b.Navigation("RoleDetails");
-
-                    b.Navigation("TaiKhoans");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SanPham", b =>
                 {
                     b.Navigation("ChiTietBSTs");
@@ -1702,6 +1657,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("Messages");
 
                     b.Navigation("PhieuNhapXuats");
+
+                    b.Navigation("RoleDetails");
 
                     b.Navigation("RoomMessages");
                 });

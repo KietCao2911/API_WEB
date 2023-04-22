@@ -18,7 +18,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public bool? DaNhapHang { get; set; } = false;
         public bool? DaThanhToan { get; set; } = false;
         public bool? DaXuatKho { get; set; } = false;
+        public bool? DaNhanHang { get; set; } = false;
         public bool? DaVeKho { get; set; } = false;
+        public bool? DaTraHang { get; set; } = false;
+        public bool? DaHoanTien { get; set; } = false;
         public decimal? TienDaThanhToan { get; set; }
         public decimal? TienDaGiam { get; set; }    
         public string? PhuongThucThanhToan { get; set; }
@@ -34,7 +37,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? steps { get; set; } = 0;
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
-        //public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
+        public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
         public virtual Coupon CouponNavigation { get; set; }
         public virtual DiaChi DiaChiNavigation { get; set; }
         public virtual KhachHang KhachHangNavigation { get; set; }

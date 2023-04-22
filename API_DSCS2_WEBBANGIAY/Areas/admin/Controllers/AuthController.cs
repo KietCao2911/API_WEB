@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -36,7 +37,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             this.mailSettings = mailSettings;
         }
 
-        [Authorize(Roles = "1")]
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<IActionResult> Auth()
         {
@@ -57,14 +58,19 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var user = _context.TaiKhoans/*.Include(r=>r.RoleDetails)*//*.Include(x => x.DiaChis)*/.FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                var user = _context.TaiKhoans.Include(r => r.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).Include(x => x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
                 if (user is null) return Unauthorized();
                 return Ok(new
                 {
                     user = new
                     {
                         userName = user.TenTaiKhoan,
-                        role = user.Role,
+                        role = user.RoleGroupNavigation.RoleDetails.Select(x => new
+                        {
+                            RoleCode= x.RoleCode,
+                            isActive = x.isActive,
+                            IdRoleNavigation = x.IdRoleNavigation
+                        }),
                         info = user.DiaChis,
                         hoadons = user.PhieuNhapXuats,
                         addressDefault = user.addressDefault,
@@ -117,7 +123,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var user = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan == body.TenTaiKhoan);
                 if (user is  null)
                 {
-                    body.Role = 0;
+                    body.RoleGroup = "USER";
                     _context.TaiKhoans.Add(body);
                     _context.SaveChanges();
                     var token = Generate(body, DateTime.Now.AddDays(15));
@@ -151,11 +157,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var user = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan == body.TenTaiKhoan&&x.isActive==true);
+                var user = await _context.TaiKhoans.Include(x=>x.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == body.TenTaiKhoan.Trim() && x.MatKhau.Trim() == body.MatKhau.Trim()&&x.isActive==true);
                 if (user is not null)
                 {
                     var token = Generate(user, DateTime.Now.AddSeconds(15));
                     var refreshToken = Generate(user, DateTime.Now.AddDays(30));
+                    user.MatKhau = "";
                     return Ok(new
                     {
                         token,
@@ -176,7 +183,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn(LoginModel body)
         {
-            var user = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName&&x.isActive==true);
+            var user = await _context.TaiKhoans.Include(x=>x.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName&&x.isActive==true);
             if(user is not null)
             {
                 var token = Generate(user, DateTime.Now.AddSeconds(15));
@@ -220,7 +227,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var user = _context.TaiKhoans/*.Include(x=>x.DiaChis)*/.FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                var user = _context.TaiKhoans.Include(x => x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
                 return Ok(new
                 {
                     user = new
@@ -244,13 +251,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var signingCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                         securityKey, SecurityAlgorithms.HmacSha256Signature);
-            var claims = new[]
+            var claims = new List<Claim>
            {
                 new Claim(ClaimTypes.NameIdentifier,user.TenTaiKhoan),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
-
             };
-
+           foreach(var role in user.RoleGroupNavigation.RoleDetails)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.RoleCode.Trim().ToString()));    
+            }
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
               _config["Jwt:Audience"],
               claims,
@@ -286,7 +294,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return new TaiKhoan
                 {
                     TenTaiKhoan = userClaim.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value,
-                    Role = Int32.Parse(userClaim.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value)
                 };
             }
             return null;

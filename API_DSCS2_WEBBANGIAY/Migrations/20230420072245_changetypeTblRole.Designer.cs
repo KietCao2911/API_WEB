@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230420072245_changetypeTblRole")]
+    partial class changetypeTblRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +54,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("TenBoSuuTap")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -1095,6 +1094,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<string>("RoleGroup")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleGroupNavigationGroupName")
                         .HasColumnType("char(20)");
 
                     b.Property<string>("TenHienThi")
@@ -1122,7 +1124,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.HasKey("TenTaiKhoan");
 
-                    b.HasIndex("RoleGroup");
+                    b.HasIndex("RoleGroupNavigationGroupName");
 
                     b.HasIndex("idKH");
 
@@ -1547,9 +1549,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", b =>
                 {
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.RoleGroup", "RoleGroupNavigation")
-                        .WithMany("TaiKhoans")
-                        .HasForeignKey("RoleGroup")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("RoleGroupNavigationGroupName");
 
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.KhachHang", "SdtKhNavigation")
                         .WithMany("TaiKhoans")
@@ -1661,8 +1662,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleGroup", b =>
                 {
                     b.Navigation("RoleDetails");
-
-                    b.Navigation("TaiKhoans");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SanPham", b =>

@@ -11,6 +11,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         }
         public string RoleCode { get; set; }
         public string RoleName { get; set; }
+        public string RoleDsc { get; set; }
+        public string Type { get; set; } = "";
         public virtual ICollection<RoleDetails> RoleDetails { get; set; }
     }
 }

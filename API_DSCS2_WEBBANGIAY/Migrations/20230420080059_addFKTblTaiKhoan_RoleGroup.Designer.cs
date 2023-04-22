@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230420080059_addFKTblTaiKhoan_RoleGroup")]
+    partial class addFKTblTaiKhoan_RoleGroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +54,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("TenBoSuuTap")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()

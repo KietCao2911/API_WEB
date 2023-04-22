@@ -19,6 +19,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Hangfire;
+using Hangfire.SqlServer;
 
 namespace API_DSCS2_WEBBANGIAY
 {
@@ -34,6 +36,7 @@ namespace API_DSCS2_WEBBANGIAY
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHangfire(config => config.UseSimpleAssemblyNameTypeSerializer().UseRecommendedSerializerSettings().UseSqlServerStorage(Configuration.GetConnectionString("ShoesEcommere")));
             services.AddCors(policy =>
             {
                 policy.AddPolicy(name: "MyAllowSpecificOrigins", policy =>
@@ -79,7 +82,7 @@ namespace API_DSCS2_WEBBANGIAY
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddSignalR();
         }
-
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -91,7 +94,6 @@ namespace API_DSCS2_WEBBANGIAY
             }
            
             app.UseHttpsRedirection();
-           
             app.UseRouting();
             app.UseFileServer(new FileServerOptions
             {

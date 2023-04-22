@@ -21,7 +21,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var Star = _context.ReviewStars.Find(body.StarReviewID);
             if (Star != null)
             {
-                Star.total++;
+                
                 switch (body.rating)
                 {
                     case 1:
@@ -42,9 +42,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     default:
                         return BadRequest("Invalid rating value.");
                 }
-
+                Star.total++;
                 Star.Avr = (Star.MotSao + Star.HaiSao * 2 + Star.BaSao * 3 + Star.BonSao * 4 + Star.NamSao * 5) / (double)Star.total;
                 _context.ReviewStars.Add(Star);
+                _context.StarReviewDetails.Add(body);
+                _context.SaveChanges();
                 return Ok(body);
             }
             else

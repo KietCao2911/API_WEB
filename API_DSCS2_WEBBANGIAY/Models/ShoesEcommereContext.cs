@@ -52,6 +52,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<StarReviewDetail> StarReviewDetails { get; set; }
         public virtual DbSet<RoleDetails> RoleDetails { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<RoleGroup> RoleGroup { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -68,12 +69,20 @@ namespace API_DSCS2_WEBBANGIAY.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+            modelBuilder.Entity<RoleGroup>(entity =>
+            {
+
+                entity.HasKey(e => e.GroupName);
+                entity.Property(e => e.GroupName).HasColumnType("char(20)");
+                entity.Property(e => e.GroupDsc).HasColumnType("nvarchar(100)");
+
+            });
             modelBuilder.Entity<RoleDetails>(entity =>
             {
 
-                entity.HasKey(e => new { e.RoleCode, e.TenTaiKhoan });
+                entity.HasKey(e => new { e.RoleCode, e.RoleGroup });
                 entity.HasOne(e => e.IdRoleNavigation).WithMany(x => x.RoleDetails).HasForeignKey(x => x.RoleCode).OnDelete(DeleteBehavior.Cascade); ;
-                entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(x => x.RoleDetails).HasForeignKey(x => x.TenTaiKhoan).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.RoleGroupNavigation).WithMany(x => x.RoleDetails).HasForeignKey(x => x.RoleGroup).OnDelete(DeleteBehavior.Cascade); ;
 
             });
             modelBuilder.Entity<Role>(entity =>
@@ -155,7 +164,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasDefaultValueSql("(getdate())");
                 entity.HasOne(e => e.NhaCungCapNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.IDNCC).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.LoaiPhieuNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.LoaiPhieu).OnDelete(DeleteBehavior.Cascade);
-                //entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.idTaiKhoan).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.idTaiKhoan).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.DiaChiNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.IdDiaChi).OnDelete(DeleteBehavior.NoAction);
                 entity.HasOne(e => e.KhoHangNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.MaChiNhanh).OnDelete(DeleteBehavior.NoAction);
 
@@ -574,6 +583,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .WithMany(p => p.TaiKhoans)
                     .HasForeignKey(d => d.idKH)
                     .HasConstraintName("fk_TaiKhoan_KH").OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.RoleGroupNavigation)
+                  .WithMany(p => p.TaiKhoans)
+                  .HasForeignKey(d => d.RoleGroup)
+                  .OnDelete(DeleteBehavior.Cascade);
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -1,4 +1,5 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
+    [Authorize(Roles = "NHAPHANGMANAGER,ADMIN")]
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]

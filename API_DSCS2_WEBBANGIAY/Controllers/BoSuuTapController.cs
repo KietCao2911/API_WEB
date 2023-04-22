@@ -18,12 +18,31 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             _context = context;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAllBST([FromQuery(Name = "type")] string type)
+        {
+            try
+            {
+                IQueryable<BoSuuTap> bst = Enumerable.Empty<BoSuuTap>().AsQueryable();
+                 bst = _context.BoSuuTaps;
+                if(type is not null && type.Length>0)
+                {
+                    bst = bst.Where(x=>x.Type == type); 
+                }
+                return Ok(bst);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpGet("{slug}")]
-        public async Task<IActionResult> Get(string slug)
+        public async Task<IActionResult> Get(string slug, [FromQuery(Name = "type")] string type)
         {
             try
             {
                 var bst = _context.BoSuuTaps.FirstOrDefault(x => x.Slug.Trim() == slug);
+
                 return Ok(bst);
             }catch (Exception ex)
             {

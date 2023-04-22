@@ -9,9 +9,11 @@ using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using System.Collections;
 using API_DSCS2_WEBBANGIAY.Areas.admin.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
+    //[Authorize(Roles = "CATEGORYMANAGER,ADMIN")]
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
@@ -140,17 +142,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }
                 _context.DanhMucs.Add(danhMuc);
                 await _context.SaveChangesAsync();
-                var danhMucObj = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Id == danhMuc.Id);
-                if(danhMucObj is not null)
-                {
-                    return Ok(new
-                    {
-                        id = danhMucObj.Id,
-                        tenDanhMuc = danhMucObj.TenDanhMuc,
-                        slug = danhMucObj.Slug,
-                        parentCategoryId = danhMucObj.ParentCategoryID
-                    });
-                }
+                return Ok(danhMuc);
             }
             catch(Exception err)
             {
@@ -185,7 +177,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 _context.DanhMucs.Remove(danhMuc);
             }
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(danhMuc);
         }
 
         private bool DanhMucExists(int id)

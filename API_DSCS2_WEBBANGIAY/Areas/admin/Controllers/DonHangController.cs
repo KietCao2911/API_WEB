@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils.Mail.TemplateHandle;
+using Microsoft.AspNetCore.Hosting;
+using API_DSCS2_WEBBANGIAY.Utils.Mail;
+using Microsoft.Extensions.Options;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
@@ -16,9 +20,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     public class DonHangController : ControllerBase
     {
         private readonly ShoesEcommereContext _context;
-        public DonHangController(ShoesEcommereContext context)
+        private readonly IHostingEnvironment _HostEnvironment;
+        private readonly IOptions<MailSettings> mailSettings;
+        public DonHangController(ShoesEcommereContext context, IHostingEnvironment hostingEnvironment, IOptions<MailSettings> mailSettings)
         {
             _context = context;
+            this._HostEnvironment = hostingEnvironment;
+            this.mailSettings = mailSettings;
         }
 
         // GET: api/DonHang
@@ -163,6 +171,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 body.steps = 4;
                 body.status = 1;
                 _context.Entry(body).State = EntityState.Modified;
+                var bodyString = await new RatingStar(_HostEnvironment,body).RenderBody("");
+                var mailBody = new MailRequest()
+                {
+                    Body = bodyString.ToString(),
+                    Subject = "XÁC NHẬN ĐƠN HÀNG",
+                    ToEmail = body.DiaChiNavigation?.Email,
+                };
+                var mailSend = new MailService(mailSettings);
+                mailSend.SendEmailAsync(mailBody);
                 await _context.SaveChangesAsync();
                 return Ok(body);
 
@@ -258,8 +275,52 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 foreach (var item in body.ChiTietNhapXuats)
                 {
                     var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
+                    if (khohang is not null && khohang.SoLuongTon - item.SoLuong == 0 && khohang.SoLuongCoTheban - item.SoLuong == 0)
+                    {
 
-                    if (khohang is not null && khohang.SoLuongTon - item.SoLuong >= 0 && khohang.SoLuongCoTheban - item.SoLuong >= 0)
+                        var sanpham = item.SanPhamNavigation;
+                        khohang.SoLuongTon -= item.SoLuong;
+                        khohang.SoLuongCoTheban -= item.SoLuong;
+                        if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
+                        {
+                            sanpham.SoLuongTon += item.SoLuong;
+                            sanpham.SoLuongCoTheban += item.SoLuong;
+                            //
+                            var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
+                            if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
+                            {
+                                var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
+                                if (pro != null)
+                                {
+                                    var index = parents.IndexOf(pro);
+                                    if (index >= 0)
+                                    {
+                                        parents[index].SoLuongCoTheban += item.SoLuong;
+                                        parents[index].SoLuongTon += item.SoLuong;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (parent is not null)
+                                {
+                                    parent.SoLuongCoTheban += item.SoLuong;
+                                    parent.SoLuongTon += item.SoLuong;
+                                    parents.Add(parent);
+                                }
+                            }
+
+                            _context.Entry(sanpham).State = EntityState.Modified;
+                            _context.Entry(khohang).State = EntityState.Modified;
+                        }
+                        else
+                        {
+                            return BadRequest();
+                        }
+                        _context.ChiTietNhapXuats.Remove(item);
+                        body.ChiTietNhapXuats.Remove(item);
+                    }
+                    else if (khohang is not null && khohang.SoLuongTon - item.SoLuong >= 0 && khohang.SoLuongCoTheban - item.SoLuong >= 0)
                     {
                         var sanpham = item.SanPhamNavigation;
                         khohang.SoLuongTon += item.SoLuong;
@@ -307,8 +368,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 _context.SanPhams.UpdateRange(parents);
                 _context.Entry(body).State = EntityState.Modified;
                 body.status = -1;
+                body.DaTraHang =true;
                 _context.SaveChanges();
-                body.status = -1;
+
                 _context.Entry(body).State = EntityState.Modified;
                 await trans.CommitAsync();
                 await _context.SaveChangesAsync();

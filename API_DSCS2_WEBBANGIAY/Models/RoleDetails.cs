@@ -3,10 +3,11 @@
     public partial class RoleDetails
     {
 
-        public string TenTaiKhoan { get; set; }
+        public string RoleGroup { get; set; }
         public string RoleCode { get; set; }
-        public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
+        public string Type { get; set; } = "";
+        public bool isActive { get; set; } = false;
+        public virtual RoleGroup RoleGroupNavigation { get; set; }
         public virtual Role IdRoleNavigation { get; set; }
-         
     }
 }

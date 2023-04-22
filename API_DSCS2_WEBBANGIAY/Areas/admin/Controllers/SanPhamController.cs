@@ -9,6 +9,7 @@ using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
@@ -17,6 +18,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     [ApiController]
     public class SanPhamController : ControllerBase
     {
+
         private readonly ShoesEcommereContext _context;
         private IConfiguration _configuration { get; set; }
         public SanPhamController(ShoesEcommereContext context, IConfiguration configuration)
@@ -26,6 +28,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         }
 
         // GET: api/SanPham
+
         [HttpGet]
 
         public async Task<ActionResult> GetSanPhams([FromQuery(Name = "sort")] string? sort,[FromQuery(Name = "pageSize")] int pageSize,

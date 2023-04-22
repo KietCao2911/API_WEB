@@ -42,6 +42,7 @@ namespace API_DSCS2_WEBBANGIAY.Utils.Mail.TemplateHandle
             StringData = StringData.Replace("{totalPrice}", FormatCurrency.Vnd(body?.ThanhTien??0));
             StringData = StringData.Replace("{totalProducts}", FormatCurrency.Vnd(body.ChiTietNhapXuats.Sum(x=>x?.DonGia??0)) ?? "0");
             StringData = StringData.Replace("{GuessName}", body?.DiaChiNavigation?.Name);
+            StringData = StringData.Replace("{Phone}", body?.DiaChiNavigation?.Phone);
             return StringData;
         }
         public async Task<string> renderProduct2HTML()

@@ -13,12 +13,13 @@ namespace API_DSCS2_WEBBANGIAY.Models
             DiaChis = new HashSet<DiaChi>();
             Messages = new HashSet<Message>();
             RoomMessages = new HashSet<RoomMessage>();
-            RoleDetails = new HashSet<RoleDetails>();
         }
         public string? Avatar { get; set; } = "";
         public string? TenHienThi { get; set; } = "";
+        public string? RoleGroup { get; set; } = "";
         public string TenTaiKhoan { get; set; }
         public string MatKhau { get; set; }
+        public bool isBlocked { get; set; } = false;
         public string Email { get; set; }
         public int? Role { get; set; }
         public int? idKH { get; set; }
@@ -27,10 +28,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public bool? isActive { get; set; } = false;
         public int? addressDefault { get; set; } 
         public virtual KhachHang SdtKhNavigation { get; set; }
+        public virtual RoleGroup RoleGroupNavigation { get; set; }
         public virtual ICollection<PhieuNhapXuat> PhieuNhapXuats { get; set; }
         public virtual ICollection<DiaChi> DiaChis { get; set; }
         public virtual ICollection<Message> Messages { get; set; }
         public virtual ICollection<RoomMessage> RoomMessages { get; set; }
-        public virtual ICollection<RoleDetails> RoleDetails { get; set; }
     }
 }
