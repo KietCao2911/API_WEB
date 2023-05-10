@@ -17,10 +17,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
             SanPhams = new HashSet<SanPham>();
             KhoHangs = new HashSet<ChiNhanh_SanPham>();
             ChiTietNhapXuats= new HashSet<ChiTietNhapXuat>();
-            ChiTietCoupons = new HashSet<ChiTietCoupon>();
+            ChiTietCouponsX = new HashSet<ChiTietCoupon>();
+            ChiTietCouponsY = new HashSet<ChiTietCoupon>();
             ChiTietBSTs = new HashSet<ChiTietBST>();
             ChiTietKhuyenMais = new HashSet<ChiTietKhuyenMai>();
-            StarReviewDetails = new HashSet<StarReviewDetail>();
         }
 
         //public string MaSanPham { get; set; }
@@ -47,6 +47,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? IDVat { get; set; } = null;
         public string? IDSize { get; set; } = null;
         public string? IDColor { get; set; } = null;
+        public int? ReviewID { get; set; } = null;
         public int? IDAnh { get; set; } = null;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -57,6 +58,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual MauSac MauSacNavigation { get; set; }
         public virtual HinhAnh HinhAnhNavigation { get; set; }
         public virtual SanPham SanPhamNavigation { get; set; }
+        public virtual ReviewStar StarReviewNavigation { get; set; }
         //public virtual ICollection<ChiTietSale> ChiTietSales { get; set; }
         public virtual ICollection<ReviewStar> ReviewStars { get; set; }
         public virtual ICollection<DanhMucDetails> DanhMucDetails { get; set; }
@@ -65,10 +67,11 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual ICollection<SanPham>SanPhams { get; set; }
         public virtual ICollection<RoomMessage> RoomMessages { get; set; }
         public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }
-        public virtual ICollection<ChiTietCoupon> ChiTietCoupons{ get; set; }
+        public virtual ICollection<ChiTietCoupon> ChiTietCouponsX{ get; set; }
+        public virtual ICollection<ChiTietCoupon> ChiTietCouponsY{ get; set; }
         public virtual ICollection<ChiTietBST> ChiTietBSTs { get; set; }
         public virtual ICollection<ChiTietKhuyenMai> ChiTietKhuyenMais { get; set; }
-        public virtual ICollection<StarReviewDetail> StarReviewDetails { get; set; }
+        
         public string VND(decimal money)
         {
             var format = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");

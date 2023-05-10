@@ -130,6 +130,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         public async Task<ActionResult<SanPham>> GetSanPham(string maSanPham)
         {
             var sanPham = await _context.SanPhams
+                .Include(x => x.StarReviewNavigation).ThenInclude(x => x.StarReviewDetails)
                       .Include(x => x.SanPhams)
                       .Include(x=>x.DanhMucDetails).                             
                       Include(x => x.SanPhams)
@@ -220,7 +221,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             ChiNhanh_SanPham khohang = new ChiNhanh_SanPham();
             try
             {
-
+                ReviewStar review = new ReviewStar();
+                _context.ReviewStars.Add(review);
+                body.ReviewID = review.Id;
                 if (body.MaSanPham == null || body.MaSanPham.Length == 0)
                 {
                     var ID = new GenKey();
@@ -243,14 +246,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             //products[i].IDVat = body.IDVat;
                             //products[i].IDBrand = body.IDBrand;
                             //products[i].IDType = body.IDType;
-                            products[i].MaSanPham = "CTK0" + ID.ID.ToString();
+                            products[i].ReviewID = review.Id;
+                            products[i].MaSanPham = "SKU0" + ID.ID.ToString();
                             products[i].ParentID = body.MaSanPham;
                             products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;
 
                         }
                     }
                 }
-               
+              
                 _context.SanPhams.Add(body);
                 await _context.SaveChangesAsync();
                 await trans.CommitAsync();

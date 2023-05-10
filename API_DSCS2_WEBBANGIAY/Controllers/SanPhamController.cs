@@ -103,7 +103,10 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             try
             {
                 var baseURL = _configuration.GetSection("BaseURL").Value;
-                var sanPham = await _context.KhoHangs.Include(x => x.SanPhamNavigation)
+                var sanPham = await _context.KhoHangs
+                    .Include(x => x.SanPhamNavigation).ThenInclude(x => x.StarReviewNavigation).ThenInclude(x => x.StarReviewDetails)
+                    .Include(x => x.SanPhamNavigation)
+                                
                           .ThenInclude(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.SanPhams).ThenInclude(x => x.KhoHangs.Where(x => x.MaChiNhanh == maChiNhanh))
                            .FirstOrDefaultAsync(x => x.SanPhamNavigation.Slug.Trim() == slug.Trim() && x.SanPhamNavigation.ParentID == null);

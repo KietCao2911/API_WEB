@@ -24,7 +24,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var coupons = _context.Coupons;
+                var coupons = _context.Coupons.OrderByDescending(x=>x.NgayBatDau);
                 return Ok(coupons);
             }
             catch (Exception err)
@@ -37,7 +37,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == maCoupon);
+                var coupon = _context.Coupons.Include(x=>x.ChiTietCoupons).Include(x=>x.CouponsKhachHang).FirstOrDefault(x => x.MaCoupon == maCoupon);
                 return Ok(coupon);
             }
             catch (Exception err)
@@ -90,6 +90,38 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             catch (Exception err)
             {
                 return BadRequest(err.Message);
+            }
+        }
+        [HttpPatch("StartApply/{maCoupon}")]
+        public async Task<IActionResult> StartCoupon(string maCoupon)
+        {
+            try
+            {
+                var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == maCoupon);
+                if (coupon is null) return NotFound();
+                coupon.trangThai = true;
+                _context.Entry(coupon).State = EntityState.Modified;
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPatch("PauseApply/{maCoupon}")]
+        public async Task<IActionResult> PauseCoupon(string maCoupon)
+        {
+            try
+            {
+                var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == maCoupon);
+                if (coupon is null) return NotFound();
+                coupon.trangThai = false;
+                _context.Entry(coupon).State = EntityState.Modified;
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
             }
         }
     }

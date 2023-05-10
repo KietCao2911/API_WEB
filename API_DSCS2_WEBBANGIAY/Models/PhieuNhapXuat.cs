@@ -8,6 +8,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public PhieuNhapXuat()
         {
             ChiTietNhapXuats = new HashSet<ChiTietNhapXuat>();
+            StarReviewDetails = new HashSet<StarReviewDetail>();
         }
 
         public int Id { get; set; }
@@ -16,6 +17,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string? CouponCode { get; set; } = "";
         public string? LoaiPhieu { get; set; }
         public bool? DaNhapHang { get; set; } = false;
+        public bool? DaReview { get; set; } = false;
         public bool? DaThanhToan { get; set; } = false;
         public bool? DaXuatKho { get; set; } = false;
         public bool? DaNhanHang { get; set; } = false;
@@ -37,6 +39,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? steps { get; set; } = 0;
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
+        public DateTime? deletedAT { get; set; } = null;
+
         public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }
         public virtual Coupon CouponNavigation { get; set; }
         public virtual DiaChi DiaChiNavigation { get; set; }
@@ -44,6 +48,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual NCC NhaCungCapNavigation { get; set; }
         public virtual LoaiPhieu LoaiPhieuNavigation { get; set; }
         public virtual ICollection<ChiTietNhapXuat> ChiTietNhapXuats { get; set; }
+        public virtual ICollection<StarReviewDetail> StarReviewDetails { get; set; }
         public virtual Branchs KhoHangNavigation { get; set; }
     }
 }

@@ -99,10 +99,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     var TenTaiKhoan = userClaim.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
                     if (TenTaiKhoan is null) return Unauthorized();
                     var user = _context.TaiKhoans.FirstOrDefault(x=>x.TenTaiKhoan == TenTaiKhoan);
-                    user.isActive = true;
-                    _context.Entry(user).State = EntityState.Modified;
-                    _context.SaveChanges();
-                    return Ok();
+                    if(user is not null)
+                    {
+                        user.isActive = true;
+                        _context.Entry(user).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+                    else
+                    {
+                        return BadRequest();
+                    }
+                   
                 }
                 else
                 {
@@ -127,6 +135,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     _context.TaiKhoans.Add(body);
                     _context.SaveChanges();
                     var token = Generate(body, DateTime.Now.AddDays(15));
+                    if (token is null) return BadRequest("");
                     var link = "http://localhost:3000/verify_email/" + token;
                     var bodyString = await new EmailVerify(_HostEnvironment).RenderBody(link);
                     var mailBody = new MailRequest()
@@ -202,6 +211,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     _context.KhachHangs.Add(body.info);
                     await _context.SaveChangesAsync();
                     TaiKhoan tk = new TaiKhoan();
+                    tk.isActive = true;
                     tk.TenTaiKhoan = body.UserName;
                     _context.TaiKhoans.Add(tk);
                     await _context.SaveChangesAsync();
@@ -255,10 +265,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
            {
                 new Claim(ClaimTypes.NameIdentifier,user.TenTaiKhoan),
             };
-           foreach(var role in user.RoleGroupNavigation.RoleDetails)
+            if (user is not null&&user?.RoleGroupNavigation is not  null && user?.RoleGroupNavigation.RoleDetails is not null && user?.RoleGroupNavigation?.RoleDetails.Count>0)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role.RoleCode.Trim().ToString()));    
+                foreach (var role in user?.RoleGroupNavigation?.RoleDetails)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role.RoleCode.Trim().ToString()));
+                }
             }
+           
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
               _config["Jwt:Audience"],
               claims,

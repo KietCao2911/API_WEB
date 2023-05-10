@@ -31,17 +31,18 @@ namespace API_DSCS2_WEBBANGIAY
             Configuration = configuration;
 
         }
-        public IConfiguration Configuration { get; }
+        public static IConfiguration Configuration { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services) 
         {
+            var ClientURL = Configuration.GetSection("ClientURL").Value;
             services.AddHangfire(config => config.UseSimpleAssemblyNameTypeSerializer().UseRecommendedSerializerSettings().UseSqlServerStorage(Configuration.GetConnectionString("ShoesEcommere")));
             services.AddCors(policy =>
             {
                 policy.AddPolicy(name: "MyAllowSpecificOrigins", policy =>
                  {
-                     policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+                     policy.AllowAnyHeader().WithOrigins(ClientURL).AllowAnyMethod();
   
                  });
             });

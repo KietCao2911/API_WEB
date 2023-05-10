@@ -35,7 +35,7 @@ namespace API_DSCS2_WEBBANGIAY.Utils.Mail.TemplateHandle
             var productHTMLs = "";
             string contentRootPath = _HostEnvironment.ContentRootPath;
             string webRootPath = _HostEnvironment.WebRootPath;
-            string path = Path.Combine(webRootPath, "Templates/Confirm1/RatingStar.html");
+            string path = Path.Combine(webRootPath, "Templates/RatingStar/productsBody.html");
             string StringData = string.Empty;
             using (StreamReader reader = new StreamReader(path))
             {

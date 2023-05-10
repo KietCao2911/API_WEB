@@ -87,6 +87,20 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return BadRequest();
             }
         }
+        [HttpPost("PostRoleGroup")]
+        public async Task<IActionResult> PostRoleGroup(RoleGroup body)
+        {
+            try
+            {
+                _context.RoleGroup.Add(body);
+                _context.SaveChanges();
+                return Ok(body ?? null);
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+            }
+        }
         [HttpPut]
         public async Task<IActionResult> Put(TaiKhoan body)
         {

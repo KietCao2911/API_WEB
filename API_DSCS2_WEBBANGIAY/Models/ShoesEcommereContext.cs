@@ -53,6 +53,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<RoleDetails> RoleDetails { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<RoleGroup> RoleGroup { get; set; }
+        public virtual DbSet<Coupons_KhachHang> Coupons_KhachHangs { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -69,6 +70,15 @@ namespace API_DSCS2_WEBBANGIAY.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+            modelBuilder.Entity<Coupons_KhachHang>(entity =>
+            {
+
+                entity.HasKey(e => new { e.MaCoupon, e.TenTaiKhoan });
+                
+                entity.HasOne(e => e.CouponNavigation).WithMany(x => x.CouponsKhachHang).HasForeignKey(x => x.MaCoupon).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.TaiKhoanNavigation).WithMany(x => x.CouponsKhachHangs).HasForeignKey(x => x.TenTaiKhoan).OnDelete(DeleteBehavior.Cascade); ;
+
+            });
             modelBuilder.Entity<RoleGroup>(entity =>
             {
 
@@ -93,12 +103,25 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
 
             });
+            modelBuilder.Entity<Role>().HasData(new Role { RoleCode = "PROCMANAGER", RoleDsc = "Thêm, sửa, xóa, sản phẩm", RoleName = "Quản lý sản phẩm" },
+                new Role { RoleCode="CATMANAGER",RoleDsc="Thêm, sửa, xóa, danh mục",RoleName="Quản lý danh mục"},
+                new Role { RoleCode = "MEMANAGER",RoleDsc="Quản lý tài khoản hội viên",RoleName ="Quản lý thành viên"},
+                new Role { RoleCode = "BSTMNG",RoleName = "Quản lý bộ sưu tập" },
+                new Role { RoleCode = "PNMANAGER",RoleName = "Quản lý phiếu nhập" },
+                new Role { RoleCode = "ORDERMNG",RoleName = "Quản lý đơn hàng" },
+                new Role { RoleCode = "ROLEMNG",RoleName = "Quản lý quyền" },
+                new Role { RoleCode = "INVENTORYMNG",RoleName = "Quản lý kho hàng" }
+
+
+
+                );
             modelBuilder.Entity<StarReviewDetail>(entity =>
             {
 
-                entity.HasKey(e => new { e.MaSanPham, e.StarReviewID });
-                entity.HasOne(e => e.MasanPhamNavigation).WithMany(x => x.StarReviewDetails).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasKey(e => new { e.StarReviewID ,e.IDDonHang,e.ID});
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
                 entity.HasOne(e => e.ReviewStarNavigation).WithMany(x => x.StarReviewDetails).HasForeignKey(x => x.StarReviewID).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.HoaDonNavigation).WithMany(x => x.StarReviewDetails).HasForeignKey(x => x.IDDonHang).OnDelete(DeleteBehavior.Cascade); ;
 
             });
             modelBuilder.Entity<ChiTietKhuyenMai>(entity =>
@@ -130,15 +153,18 @@ namespace API_DSCS2_WEBBANGIAY.Models
             {
 
                 entity.HasKey(e => e.MaCoupon);
+
                 entity.Property(x => x.MaCoupon).HasColumnType("char(15)");
 
             });
             modelBuilder.Entity<ChiTietCoupon>(entity =>
             {
-                entity.HasKey(e => new {e.MaSanPham,e.MaCoupon});
+                entity.HasKey(e => new {e.MaSanPhamX,e.MaSanPhamY,e.MaCoupon});
+                entity.Property(e => e.LoaiSanPham).HasColumnType("char(5)");
                 entity.Property(x => x.MaCoupon).HasColumnType("char(15)");
-                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(e => e.CouponNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaCoupon).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.SanPhamXNavigation).WithMany(x => x.ChiTietCouponsX).HasForeignKey(x => x.MaSanPhamX).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(e => e.SanPhamYNavigation).WithMany(x => x.ChiTietCouponsY).HasForeignKey(x => x.MaSanPhamY).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(e => e.CouponNavigation).WithMany(x => x.ChiTietCoupons).HasForeignKey(x => x.MaCoupon);
 
             });
             modelBuilder.Entity<LoaiPhieu>(entity =>
@@ -282,36 +308,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasDefaultValueSql("(getdate())");
             });
 
-
-            //modelBuilder.Entity<ChiTietSale>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.IdSale, e.MaSanPham })
-            //        .HasName("pk_cts");
-
-            //    entity.ToTable("ChiTietSale");
-
-            //    entity.HasIndex(e => e.MaSanPham, "IX_ChiTietSale_MaSanPham");
-
-            //    entity.Property(e => e.IdSale).HasColumnName("_id_sale");
-
-            //    entity.Property(e => e.MaSanPham)
-            //        .HasMaxLength(10)
-            //        .IsUnicode(false)
-            //        .IsFixedLength(true);
-
-            //    entity.Property(e => e.Giamgia).HasColumnName("giamgia");
-
-            //    entity.HasOne(d => d.IdSaleNavigation)
-            //        .WithMany(p => p.ChiTietSales)
-            //        .HasForeignKey(d => d.IdSale)
-            //        .HasConstraintName("fk_cts_Sale");
-
-            //    entity.HasOne(d => d.MaSanPhamNavigation)
-            //        .WithMany(p => p.ChiTietSales)
-            //        .HasForeignKey(d => d.MaSanPham)
-            //        .HasConstraintName("fk_cts_SP");
-            //});
-
             modelBuilder.Entity<DanhMuc>(entity =>
             {
                 entity.ToTable("DanhMuc");
@@ -374,11 +370,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_cthd_sanpham");
 
-                //entity.HasOne(d => d.MauSacNavigation)
-                //    .WithMany(p => p.HinhAnhSanPhams)
-                //    .HasForeignKey(d => d.)
-                //    .OnDelete(DeleteBehavior.Cascade)
-                //    .HasConstraintName("fk_cthd_sanpham");
             });
             modelBuilder.Entity<ChiTietHinhAnh>(entity =>
             {
@@ -546,6 +537,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.HasOne(x => x.SizeNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDSize).OnDelete(DeleteBehavior.Cascade); ;
                 entity.HasOne(x => x.HinhAnhNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDAnh);
                 entity.HasOne(x => x.MauSacNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDColor) ;
+                entity.HasOne(x => x.StarReviewNavigation).WithOne(e => e.SanPhamNavigation).HasForeignKey<SanPham>(e=>e.ReviewID) ;
             });
 
    

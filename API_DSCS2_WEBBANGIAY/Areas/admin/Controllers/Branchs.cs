@@ -1,6 +1,7 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,11 +82,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var trans = _context.Database.BeginTransaction();
             try
             {
-                var products = _context.SanPhams;
+                var products = _context.SanPhams.AsNoTracking().ToList();
                 foreach(var product in products)
                 {
-                    var khohangCheck = _context.KhoHangs.Any(x => x.MaSanPham == product.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
-                    if (khohangCheck)
+
+                    var khohangCheck = _context.KhoHangs.AsNoTracking()
+                        .FirstOrDefault(x => x.MaSanPham.Trim() == product.MaSanPham.Trim() && x.MaChiNhanh.Trim() == body.MaChiNhanh.Trim());
+                    if (khohangCheck is not null)
                     {
 
                     }
@@ -94,7 +97,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         ChiNhanh_SanPham kho = new ChiNhanh_SanPham();
                         kho.MaChiNhanh = body.MaChiNhanh;
                         kho.MaSanPham = product.MaSanPham;
-                        _context.KhoHangs.Add(kho);
+                        _context.Entry(kho).State = EntityState.Added;
                         body.KhoHangs.Add(kho);
                     }
                    
@@ -106,7 +109,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             catch (Exception err)
             {
                  trans.RollbackAsync();
-                return NotFound(err.Message);
+                return BadRequest();
             }
         }
     }
