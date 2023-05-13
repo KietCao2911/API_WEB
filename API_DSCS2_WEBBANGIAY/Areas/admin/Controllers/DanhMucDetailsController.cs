@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "CATEMNG")]
     [ApiController]
     public class DanhMucDetailsController : ControllerBase
     {

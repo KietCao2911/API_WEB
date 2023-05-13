@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
-    //[Authorize(Roles = "NHAPHANGMANAGER,ADMIN")]
+    [Authorize(Roles = "PNMANAGER")]
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
@@ -106,7 +106,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 foreach (var item in body.ChiTietNhapXuats)
                 {
                     var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
-                    if(khohang is not null && khohang.SoLuongTon - item.SoLuong == 0 && khohang.SoLuongCoTheban - item.SoLuong == 0)
+                    var chitietnhapxuat = _context.ChiTietNhapXuats.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.IDPN == item.IDPN);
+                    if (khohang is not null && khohang.SoLuongTon - item.SoLuong == 0 && khohang.SoLuongCoTheban - item.SoLuong == 0)
                     {
                        
 
@@ -200,14 +201,23 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         return BadRequest();
 
                     }
-                    body.ThanhTien -= item.DonGia;
-                    body.TongSoLuong -= item.SoLuong;
-                    item.SoLuong -= item.SoLuong;
-                    item.ThanhTien -= item.ThanhTien;
-                    item.DonGia = 0;
-                    _context.Entry(item).State = EntityState.Modified;
-                    
+                    if (chitietnhapxuat.SoLuong == item.SoLuong)
+                    {
+                        item.deletedAT = DateTime.Now;
+                        body.ChiTietNhapXuats.Remove(item);
+                        _context.Entry(item).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        chitietnhapxuat.SoLuong -= item.SoLuong;
+                        chitietnhapxuat.ThanhTien -= item.ThanhTien;
+                        body.ThanhTien -= item.DonGia;
+                        body.TongSoLuong -= item.SoLuong;
+                        _context.Entry(item).State = EntityState.Modified;
+                    }
+
                 }
+
                 _context.SanPhams.UpdateRange(parents);
                 body.status = -1;
                 body.DaTraHang = true;

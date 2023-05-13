@@ -16,6 +16,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = "PRODMNG")]
+
     public class SanPhamController : ControllerBase
     {
 
@@ -223,7 +225,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 ReviewStar review = new ReviewStar();
                 _context.ReviewStars.Add(review);
+                _context.SaveChanges();
                 body.ReviewID = review.Id;
+
                 if (body.MaSanPham == null || body.MaSanPham.Length == 0)
                 {
                     var ID = new GenKey();

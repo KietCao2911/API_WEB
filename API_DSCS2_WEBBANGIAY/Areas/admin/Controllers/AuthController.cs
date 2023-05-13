@@ -37,21 +37,21 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             this.mailSettings = mailSettings;
         }
 
-        [Authorize(Roles = "ADMIN")]
-        [HttpGet]
-        public async Task<IActionResult> Auth()
-        {
-            try
-            {
-                var currentUser = GetCurrentUser();
-                //var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //[Authorize(Roles = "ADMIN")]
+        //[HttpGet]
+        //public async Task<IActionResult> Auth()
+        //{
+        //    try
+        //    {
+        //        var currentUser = GetCurrentUser();
+        //        //var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
         [HttpGet("GetUser")]
         public async Task<IActionResult> GetUser()
         {
@@ -59,12 +59,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 var currentUser = GetCurrentUser();
                 var user = _context.TaiKhoans.Include(r => r.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).Include(x => x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
-                if (user is null) return Unauthorized();
+                if (user is null) return Unauthorized(new
+                {
+                    status=false,
+                });
                 return Ok(new
                 {
                     user = new
                     {
                         userName = user.TenTaiKhoan,
+                        roleGroup=user.RoleGroup,
                         role = user.RoleGroupNavigation.RoleDetails.Select(x => new
                         {
                             RoleCode= x.RoleCode,
@@ -166,9 +170,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var user = await _context.TaiKhoans.Include(x=>x.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == body.TenTaiKhoan.Trim() && x.MatKhau.Trim() == body.MatKhau.Trim()&&x.isActive==true);
+                var user = await _context.TaiKhoans.Include(x=>x.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == body.TenTaiKhoan.Trim() && x.MatKhau.Trim() == body.MatKhau.Trim());
                 if (user is not null)
                 {
+
+                if ((bool)!user.isActive ) return BadRequest("Chưa kích hoạt tài khoản");
                     var token = Generate(user, DateTime.Now.AddSeconds(15));
                     var refreshToken = Generate(user, DateTime.Now.AddDays(30));
                     user.MatKhau = "";
@@ -182,6 +188,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 else
                 {
                     return BadRequest("Sai tài khoản hoặc mật khẩu.");
+                    
                 }
             }
             catch(Exception err)
@@ -189,28 +196,81 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return NotFound();
             }
         }
-        [HttpPost("SignIn")]
-        public async Task<IActionResult> SignIn(LoginModel body)
+        [HttpPost("AdminLogin")]
+        public async Task <IActionResult> AdminLogin(LoginModel body)
+        {
+            try
+            {
+                var user = await _context.TaiKhoans
+                    .Include(x => x.RoleGroupNavigation).ThenInclude(x => x.RoleDetails)
+                    .FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == body.UserName.Trim()&&x.MatKhau.Trim()==body.Password.Trim());
+                if (user ==null)
+                {
+                    return NotFound("Sai tài khoản hoặc mật khẩu");
+                }
+                if (user.RoleGroup.Trim() != "ADMIN") return Unauthorized();
+                
+                var token = Generate(user, DateTime.Now.AddSeconds(15));
+                var refreshToken = Generate(user, DateTime.Now.AddDays(30));
+                user.MatKhau = "";
+                return Ok(new
+                {
+                    token,
+                    refreshToken,
+                    info = user,
+                });
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost("ManagerLogin")]
+        public async Task<IActionResult> ManagerLogin(LoginModel body)
+        {
+            try
+            {
+                var user = await _context.TaiKhoans.Include(x => x.RoleGroupNavigation)
+                    .ThenInclude(x => x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName );
+                if (user is null) return NotFound();
+                if (user.RoleGroup.Trim() != "MANAGER") return Unauthorized();
+                var token = Generate(user, DateTime.Now.AddSeconds(15));
+                var refreshToken = Generate(user, DateTime.Now.AddDays(30));
+                user.MatKhau = "";
+                return Ok(new
+                {
+                    token,
+                    refreshToken,
+                    info = user,
+                });
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPost("PhoneSignIn")]
+        public async Task<IActionResult> PhoneSignIn(LoginModel body)
         {
             var user = await _context.TaiKhoans.Include(x=>x.RoleGroupNavigation).ThenInclude(x=>x.RoleDetails).FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName&&x.isActive==true);
             if(user is not null)
             {
                 var token = Generate(user, DateTime.Now.AddSeconds(15));
                 var refreshToken = Generate(user, DateTime.Now.AddDays(30));
+                user.MatKhau = "";
                 return Ok(new
                 {
                     token,
                     refreshToken,
-                    info=user,
-                });
+                    info = user,
+                }) ;
             }
             else
             {
                 try
                 {
-                    _context.KhachHangs.Add(body.info);
-                    await _context.SaveChangesAsync();
                     TaiKhoan tk = new TaiKhoan();
+                    tk.RoleGroup = "USER";
                     tk.isActive = true;
                     tk.TenTaiKhoan = body.UserName;
                     _context.TaiKhoans.Add(tk);
@@ -221,7 +281,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     {
                         token,
                         refreshToken,
-                        info = body.info,
+                        info =tk,
                     });
                 }
                 catch (Exception ex)
@@ -244,8 +304,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     {
                         userName = user.TenTaiKhoan,
                         role = user.Role,
-                        //info = user.DiaChis
-
                     }
 
                 }); ;
@@ -278,7 +336,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
               claims,
               expires: expires,
               signingCredentials: signingCredentials);
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 

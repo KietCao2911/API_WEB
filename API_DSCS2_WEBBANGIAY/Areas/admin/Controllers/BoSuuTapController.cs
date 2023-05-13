@@ -8,12 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles ="BSTMNG")]
     public class BoSuuTapController : ControllerBase
     {
         private readonly ShoesEcommereContext _context;

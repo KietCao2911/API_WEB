@@ -42,7 +42,7 @@ namespace API_DSCS2_WEBBANGIAY
             {
                 policy.AddPolicy(name: "MyAllowSpecificOrigins", policy =>
                  {
-                     policy.AllowAnyHeader().WithOrigins(ClientURL).AllowAnyMethod();
+                     policy.WithOrigins(ClientURL).AllowAnyHeader().AllowAnyMethod();
   
                  });
             });
@@ -59,13 +59,13 @@ namespace API_DSCS2_WEBBANGIAY
                 };
             });
             services.AddDistributedMemoryCache();
-            services.AddSession(options =>
-            {
-                options.Cookie.Name = ".AdventureWorks.Session";
-                options.IdleTimeout = TimeSpan.FromDays(1);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
+            //services.AddSession(options =>
+            //{
+            //    options.Cookie.Name = ".AdventureWorks.Session";
+            //    options.IdleTimeout = TimeSpan.FromDays(1);
+            //    options.Cookie.HttpOnly = true;
+            //    options.Cookie.IsEssential = true;
+            //});
             services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 ).AddJsonOptions(options =>
@@ -93,7 +93,7 @@ namespace API_DSCS2_WEBBANGIAY
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_DSCS2_WEBBANGIAY v1"));
             }
-           
+            app.UseCors("MyAllowSpecificOrigins");
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseFileServer(new FileServerOptions
@@ -101,13 +101,13 @@ namespace API_DSCS2_WEBBANGIAY
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
                 RequestPath = "/wwwroot"
             });
-            app.UseSession();
+            //app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseStaticFiles();
            
-            app.UseCors("MyAllowSpecificOrigins");
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230512095008_initValues2")]
+    partial class initValues2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -610,24 +612,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasKey("MaPhieu");
 
                     b.ToTable("LoaiPhieu");
-
-                    b.HasData(
-                        new
-                        {
-                            MaPhieu = "PHIEUNHAP"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUXUAT"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUTHU"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUCHI"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.MauSac", b =>
@@ -965,7 +949,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasData(
                         new
                         {
-                            RoleCode = "CATEMNG",
+                            RoleCode = "CATMANAGER",
                             RoleDsc = "Thêm, sửa, xóa, danh mục",
                             RoleName = "Quản lý danh mục",
                             Type = ""
@@ -979,28 +963,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         },
                         new
                         {
-                            RoleCode = "HOMEADMIN",
-                            RoleDsc = "Xem tổng quan về cửa hàng, doanh thu, sản phẩm nổi bật,...",
-                            RoleName = "Trang chủ admin",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
-                            RoleDsc = "Xem tổng quan về đơn hàng, kho hàng dành cho người quản lý",
-                            RoleName = "Trang chủ manager",
-                            Type = ""
-                        },
-                        new
-                        {
                             RoleCode = "BSTMNG",
                             RoleName = "Quản lý bộ sưu tập",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "ROLEMNG",
-                            RoleName = "Quản lý phân quyền",
                             Type = ""
                         },
                         new
@@ -1032,24 +996,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                             RoleCode = "SALEMNG",
                             RoleName = "Quản lý Khuyến mãi",
                             Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "PRODMNG",
-                            RoleName = "Quản lý Sản phẩm",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "TKDTMNG",
-                            RoleName = "Thống kê doanh thu",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "CUSTOMERMNG",
-                            RoleName = "Quản lý khách hàng",
-                            Type = ""
                         });
                 });
 
@@ -1076,7 +1022,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasData(
                         new
                         {
-                            RoleCode = "CATEMNG",
+                            RoleCode = "CATMANAGER",
                             RoleGroup = "ADMIN",
                             Type = "",
                             isActive = false
@@ -1090,28 +1036,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         },
                         new
                         {
-                            RoleCode = "HOMEADMIN",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
                             RoleCode = "BSTMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "ROLEMNG",
                             RoleGroup = "ADMIN",
                             Type = "",
                             isActive = false
@@ -1147,27 +1072,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         new
                         {
                             RoleCode = "SALEMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "PRODMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "TKDTMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "CUSTOMERMNG",
                             RoleGroup = "ADMIN",
                             Type = "",
                             isActive = false

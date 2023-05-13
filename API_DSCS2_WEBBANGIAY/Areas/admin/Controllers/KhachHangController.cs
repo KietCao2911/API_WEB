@@ -6,9 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
+
+    [Authorize(Roles = "CUSTOMERMNG")]
+
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]

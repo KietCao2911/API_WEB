@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -66,11 +67,65 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 optionsBuilder.EnableSensitiveDataLogging();
             }
         }
+        private List<Size> SizeGenerate()
+        {
+            List<Size> sizes = new List<Size>();    
+            for(int i =25;i<=47;i++)
+            {
+                sizes.Add(new Size {Id= i.ToString(), Size1 = i.ToString() });
+            }
+                sizes.Add(new Size {Id= "S", Size1 = "S" });
+                sizes.Add(new Size {Id= "M", Size1 = "M" });
+                sizes.Add(new Size {Id= "L", Size1 = "L" });
+                sizes.Add(new Size {Id= "XL", Size1 = "XL" });
+                sizes.Add(new Size {Id= "2XL", Size1 = "2XL" });
+                sizes.Add(new Size {Id= "3XL", Size1 = "3XL" });
+                sizes.Add(new Size {Id= "4XL", Size1 = "4XL" });
+            return sizes;
+        }
+        private List<Role>RoleGenerate()
+        {
+            List<Role> roles = new List<Role>();
 
+            roles.Add(new Role { RoleCode = "CATEMNG", RoleDsc = "Thêm, sửa, xóa, danh mục", RoleName = "Quản lý danh mục" });
+            roles.Add(new Role { RoleCode = "MEMANAGER", RoleDsc = "Quản lý tài khoản hội viên", RoleName = "Quản lý thành viên" });
+            roles.Add(new Role { RoleCode = "HOMEADMIN", RoleDsc = "Xem tổng quan về cửa hàng, doanh thu, sản phẩm nổi bật,...", RoleName = "Trang chủ admin" });
+            roles.Add(new Role { RoleCode = "HOMEMANAGER", RoleDsc = "Xem tổng quan về đơn hàng, kho hàng dành cho người quản lý", RoleName = "Trang chủ manager" });
+            roles.Add(new Role { RoleCode = "BSTMNG", RoleName = "Quản lý bộ sưu tập" });
+            roles.Add(new Role { RoleCode = "ROLEMNG", RoleName = "Quản lý phân quyền" });
+            roles.Add(new Role { RoleCode = "PNMANAGER", RoleName = "Quản lý phiếu nhập" });
+            roles.Add(new Role { RoleCode = "ORDERMNG", RoleName = "Quản lý đơn hàng" });
+            roles.Add(new Role { RoleCode = "INVENTORYMNG", RoleName = "Quản lý kho hàng" });
+            roles.Add(new Role { RoleCode = "COUPONMNG", RoleName = "Quản lý Coupon" });
+            roles.Add(new Role { RoleCode = "SALEMNG", RoleName = "Quản lý Khuyến mãi" });
+            roles.Add(new Role { RoleCode = "PRODMNG", RoleName = "Quản lý Sản phẩm" });
+            roles.Add(new Role { RoleCode = "TKDTMNG", RoleName = "Thống kê doanh thu" });
+            roles.Add(new Role { RoleCode = "CUSTOMERMNG", RoleName = "Quản lý khách hàng" });
+            return roles;
+        }
+        private List<LoaiPhieu> GenerateLoaiPhieu()
+        {
+            List<LoaiPhieu> lps = new List<LoaiPhieu>();
+            lps.Add(new LoaiPhieu { MaPhieu = "PHIEUNHAP" });
+            lps.Add(new LoaiPhieu { MaPhieu = "PHIEUXUAT" });
+            lps.Add(new LoaiPhieu { MaPhieu = "PHIEUTHU" });
+            lps.Add(new LoaiPhieu { MaPhieu = "PHIEUCHI" });
+            return lps;
+        }
+        private List<RoleDetails>RoleDetailGenerate()
+        {
+            List<RoleDetails> roleDetails = new List<RoleDetails>();
+            foreach(var role in RoleGenerate())
+            {
+                roleDetails.Add(new Models.RoleDetails { RoleCode = role.RoleCode, RoleGroup = "ADMIN" });
+            }
+            return roleDetails;
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-            modelBuilder.Entity<Coupons_KhachHang>(entity =>
+          
+          modelBuilder.Entity<Coupons_KhachHang>(entity =>
             {
 
                 entity.HasKey(e => new { e.MaCoupon, e.TenTaiKhoan });
@@ -103,18 +158,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
 
             });
-            modelBuilder.Entity<Role>().HasData(new Role { RoleCode = "PROCMANAGER", RoleDsc = "Thêm, sửa, xóa, sản phẩm", RoleName = "Quản lý sản phẩm" },
-                new Role { RoleCode="CATMANAGER",RoleDsc="Thêm, sửa, xóa, danh mục",RoleName="Quản lý danh mục"},
-                new Role { RoleCode = "MEMANAGER",RoleDsc="Quản lý tài khoản hội viên",RoleName ="Quản lý thành viên"},
-                new Role { RoleCode = "BSTMNG",RoleName = "Quản lý bộ sưu tập" },
-                new Role { RoleCode = "PNMANAGER",RoleName = "Quản lý phiếu nhập" },
-                new Role { RoleCode = "ORDERMNG",RoleName = "Quản lý đơn hàng" },
-                new Role { RoleCode = "ROLEMNG",RoleName = "Quản lý quyền" },
-                new Role { RoleCode = "INVENTORYMNG",RoleName = "Quản lý kho hàng" }
-
-
-
-                );
             modelBuilder.Entity<StarReviewDetail>(entity =>
             {
 
@@ -460,7 +503,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
              
 
-                entity.Property(e => e.Id).HasColumnName("_id");
+                entity.Property(e => e.Id).HasColumnName("_id").ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Avr)
                     .HasColumnName("avr")
@@ -580,7 +623,40 @@ namespace API_DSCS2_WEBBANGIAY.Models
                   .HasForeignKey(d => d.RoleGroup)
                   .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<Role>().HasData(RoleGenerate());
+            modelBuilder.Entity<Size>().HasData(SizeGenerate());
+            modelBuilder.Entity<RoleDetails>().HasData(RoleDetailGenerate());
+            modelBuilder.Entity<LoaiPhieu>().HasData(GenerateLoaiPhieu());
 
+            modelBuilder.Entity<RoleGroup>().HasData(
+                new RoleGroup { GroupName="ADMIN"},
+                new RoleGroup { GroupName="MANAGER"},
+                new RoleGroup { GroupName="USER"}
+                );
+            modelBuilder.Entity<MauSac>().HasData(
+                new MauSac { MaMau = "red" },
+                new MauSac { MaMau = "black" },
+                new MauSac { MaMau = "white" },
+                new MauSac { MaMau = "blue" },
+                new MauSac { MaMau = "green" },
+                new MauSac { MaMau = "browb" },
+                new MauSac { MaMau = "fuchsia" },
+                new MauSac { MaMau = "aqua" },
+                new MauSac { MaMau = "yellow" },
+                new MauSac { MaMau = "maroon" },
+                new MauSac { MaMau = "silver" },
+                new MauSac { MaMau = "purple" },
+                new MauSac { MaMau = "olive" },
+                new MauSac { MaMau = "gray" },
+                new MauSac { MaMau = "teal" }
+                );
+            modelBuilder.Entity<Branchs>().HasData(
+                new Branchs { MaChiNhanh="CN01",TenChiNhanh="Chi nhánh Đồng tháp"}
+                );
+
+            modelBuilder.Entity<TaiKhoan>().HasData(
+                new TaiKhoan { TenTaiKhoan="admin",MatKhau="admin",RoleGroup="ADMIN"}
+                );
             OnModelCreatingPartial(modelBuilder);
         }
 

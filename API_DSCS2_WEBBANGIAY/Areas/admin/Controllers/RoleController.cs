@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
     //[Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = "ROLEMNG")]
+
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]

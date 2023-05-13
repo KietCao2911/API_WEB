@@ -12,12 +12,14 @@ using API_DSCS2_WEBBANGIAY.Utils.Mail;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using API_DSCS2_WEBBANGIAY.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = "ORDERMNG")]
 
     public class DonHangController : ControllerBase
     {
@@ -343,8 +345,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         if (chitietnhapxuat.SoLuong == item.SoLuong)
                         {
                             item.deletedAT = DateTime.Now;
-                            body.ThanhTien =0;
-                            body.TongSoLuong=0;
                             body.ChiTietNhapXuats.Remove(item);
                             _context.Entry(item).State = EntityState.Modified;
                         }

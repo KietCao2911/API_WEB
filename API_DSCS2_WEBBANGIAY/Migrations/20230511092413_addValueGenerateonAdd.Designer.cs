@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230511092413_addValueGenerateonAdd")]
+    partial class addValueGenerateonAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,15 +95,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasIndex("DiaChiNavigationID");
 
                     b.ToTable("Branchs");
-
-                    b.HasData(
-                        new
-                        {
-                            MaChiNhanh = "CN01",
-                            ID = 0,
-                            TenChiNhanh = "Chi nhánh Đồng tháp",
-                            isDefault = false
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Brand", b =>
@@ -610,24 +603,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasKey("MaPhieu");
 
                     b.ToTable("LoaiPhieu");
-
-                    b.HasData(
-                        new
-                        {
-                            MaPhieu = "PHIEUNHAP"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUXUAT"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUTHU"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUCHI"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.MauSac", b =>
@@ -651,68 +626,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasName("pk_mausac");
 
                     b.ToTable("MauSac");
-
-                    b.HasData(
-                        new
-                        {
-                            MaMau = "red"
-                        },
-                        new
-                        {
-                            MaMau = "black"
-                        },
-                        new
-                        {
-                            MaMau = "white"
-                        },
-                        new
-                        {
-                            MaMau = "blue"
-                        },
-                        new
-                        {
-                            MaMau = "green"
-                        },
-                        new
-                        {
-                            MaMau = "browb"
-                        },
-                        new
-                        {
-                            MaMau = "fuchsia"
-                        },
-                        new
-                        {
-                            MaMau = "aqua"
-                        },
-                        new
-                        {
-                            MaMau = "yellow"
-                        },
-                        new
-                        {
-                            MaMau = "maroon"
-                        },
-                        new
-                        {
-                            MaMau = "silver"
-                        },
-                        new
-                        {
-                            MaMau = "purple"
-                        },
-                        new
-                        {
-                            MaMau = "olive"
-                        },
-                        new
-                        {
-                            MaMau = "gray"
-                        },
-                        new
-                        {
-                            MaMau = "teal"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Message", b =>
@@ -965,7 +878,14 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasData(
                         new
                         {
-                            RoleCode = "CATEMNG",
+                            RoleCode = "PROCMANAGER",
+                            RoleDsc = "Thêm, sửa, xóa, sản phẩm",
+                            RoleName = "Quản lý sản phẩm",
+                            Type = ""
+                        },
+                        new
+                        {
+                            RoleCode = "CATMANAGER",
                             RoleDsc = "Thêm, sửa, xóa, danh mục",
                             RoleName = "Quản lý danh mục",
                             Type = ""
@@ -979,28 +899,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         },
                         new
                         {
-                            RoleCode = "HOMEADMIN",
-                            RoleDsc = "Xem tổng quan về cửa hàng, doanh thu, sản phẩm nổi bật,...",
-                            RoleName = "Trang chủ admin",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
-                            RoleDsc = "Xem tổng quan về đơn hàng, kho hàng dành cho người quản lý",
-                            RoleName = "Trang chủ manager",
-                            Type = ""
-                        },
-                        new
-                        {
                             RoleCode = "BSTMNG",
                             RoleName = "Quản lý bộ sưu tập",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "ROLEMNG",
-                            RoleName = "Quản lý phân quyền",
                             Type = ""
                         },
                         new
@@ -1017,38 +917,14 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         },
                         new
                         {
+                            RoleCode = "ROLEMNG",
+                            RoleName = "Quản lý quyền",
+                            Type = ""
+                        },
+                        new
+                        {
                             RoleCode = "INVENTORYMNG",
                             RoleName = "Quản lý kho hàng",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "COUPONMNG",
-                            RoleName = "Quản lý Coupon",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "SALEMNG",
-                            RoleName = "Quản lý Khuyến mãi",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "PRODMNG",
-                            RoleName = "Quản lý Sản phẩm",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "TKDTMNG",
-                            RoleName = "Thống kê doanh thu",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "CUSTOMERMNG",
-                            RoleName = "Quản lý khách hàng",
                             Type = ""
                         });
                 });
@@ -1072,106 +948,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasIndex("RoleGroup");
 
                     b.ToTable("RoleDetails");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleCode = "CATEMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "MEMANAGER",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEADMIN",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "BSTMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "ROLEMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "PNMANAGER",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "ORDERMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "INVENTORYMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "COUPONMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "SALEMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "PRODMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "TKDTMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "CUSTOMERMNG",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoleGroup", b =>
@@ -1185,20 +961,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasKey("GroupName");
 
                     b.ToTable("RoleGroup");
-
-                    b.HasData(
-                        new
-                        {
-                            GroupName = "ADMIN"
-                        },
-                        new
-                        {
-                            GroupName = "MANAGER"
-                        },
-                        new
-                        {
-                            GroupName = "USER"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.RoomMessage", b =>
@@ -1396,158 +1158,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Sizes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "25",
-                            Size1 = "25"
-                        },
-                        new
-                        {
-                            Id = "26",
-                            Size1 = "26"
-                        },
-                        new
-                        {
-                            Id = "27",
-                            Size1 = "27"
-                        },
-                        new
-                        {
-                            Id = "28",
-                            Size1 = "28"
-                        },
-                        new
-                        {
-                            Id = "29",
-                            Size1 = "29"
-                        },
-                        new
-                        {
-                            Id = "30",
-                            Size1 = "30"
-                        },
-                        new
-                        {
-                            Id = "31",
-                            Size1 = "31"
-                        },
-                        new
-                        {
-                            Id = "32",
-                            Size1 = "32"
-                        },
-                        new
-                        {
-                            Id = "33",
-                            Size1 = "33"
-                        },
-                        new
-                        {
-                            Id = "34",
-                            Size1 = "34"
-                        },
-                        new
-                        {
-                            Id = "35",
-                            Size1 = "35"
-                        },
-                        new
-                        {
-                            Id = "36",
-                            Size1 = "36"
-                        },
-                        new
-                        {
-                            Id = "37",
-                            Size1 = "37"
-                        },
-                        new
-                        {
-                            Id = "38",
-                            Size1 = "38"
-                        },
-                        new
-                        {
-                            Id = "39",
-                            Size1 = "39"
-                        },
-                        new
-                        {
-                            Id = "40",
-                            Size1 = "40"
-                        },
-                        new
-                        {
-                            Id = "41",
-                            Size1 = "41"
-                        },
-                        new
-                        {
-                            Id = "42",
-                            Size1 = "42"
-                        },
-                        new
-                        {
-                            Id = "43",
-                            Size1 = "43"
-                        },
-                        new
-                        {
-                            Id = "44",
-                            Size1 = "44"
-                        },
-                        new
-                        {
-                            Id = "45",
-                            Size1 = "45"
-                        },
-                        new
-                        {
-                            Id = "46",
-                            Size1 = "46"
-                        },
-                        new
-                        {
-                            Id = "47",
-                            Size1 = "47"
-                        },
-                        new
-                        {
-                            Id = "S",
-                            Size1 = "S"
-                        },
-                        new
-                        {
-                            Id = "M",
-                            Size1 = "M"
-                        },
-                        new
-                        {
-                            Id = "L",
-                            Size1 = "L"
-                        },
-                        new
-                        {
-                            Id = "XL",
-                            Size1 = "XL"
-                        },
-                        new
-                        {
-                            Id = "2XL",
-                            Size1 = "2XL"
-                        },
-                        new
-                        {
-                            Id = "3XL",
-                            Size1 = "3XL"
-                        },
-                        new
-                        {
-                            Id = "4XL",
-                            Size1 = "4XL"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.StarReviewDetail", b =>
@@ -1651,20 +1261,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasIndex("idKH");
 
                     b.ToTable("TaiKhoan");
-
-                    b.HasData(
-                        new
-                        {
-                            TenTaiKhoan = "admin",
-                            Avatar = "",
-                            MatKhau = "admin",
-                            RoleGroup = "ADMIN",
-                            SoLanMuaHang = 0,
-                            TenHienThi = "",
-                            TienThanhToan = 0m,
-                            isActive = false,
-                            isBlocked = false
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Type", b =>

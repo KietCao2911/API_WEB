@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230512105434_initValues3")]
+    partial class initValues3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -610,24 +612,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasKey("MaPhieu");
 
                     b.ToTable("LoaiPhieu");
-
-                    b.HasData(
-                        new
-                        {
-                            MaPhieu = "PHIEUNHAP"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUXUAT"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUTHU"
-                        },
-                        new
-                        {
-                            MaPhieu = "PHIEUCHI"
-                        });
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.MauSac", b =>
@@ -965,7 +949,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasData(
                         new
                         {
-                            RoleCode = "CATEMNG",
+                            RoleCode = "   ",
                             RoleDsc = "Thêm, sửa, xóa, danh mục",
                             RoleName = "Quản lý danh mục",
                             Type = ""
@@ -975,20 +959,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                             RoleCode = "MEMANAGER",
                             RoleDsc = "Quản lý tài khoản hội viên",
                             RoleName = "Quản lý thành viên",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEADMIN",
-                            RoleDsc = "Xem tổng quan về cửa hàng, doanh thu, sản phẩm nổi bật,...",
-                            RoleName = "Trang chủ admin",
-                            Type = ""
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
-                            RoleDsc = "Xem tổng quan về đơn hàng, kho hàng dành cho người quản lý",
-                            RoleName = "Trang chủ manager",
                             Type = ""
                         },
                         new
@@ -1076,7 +1046,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.HasData(
                         new
                         {
-                            RoleCode = "CATEMNG",
+                            RoleCode = "   ",
                             RoleGroup = "ADMIN",
                             Type = "",
                             isActive = false
@@ -1084,20 +1054,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         new
                         {
                             RoleCode = "MEMANAGER",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEADMIN",
-                            RoleGroup = "ADMIN",
-                            Type = "",
-                            isActive = false
-                        },
-                        new
-                        {
-                            RoleCode = "HOMEMANAGER",
                             RoleGroup = "ADMIN",
                             Type = "",
                             isActive = false

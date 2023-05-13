@@ -17,6 +17,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = "CATEMNG")]
+
     public class DanhMucController : ControllerBase
     {
         private readonly ShoesEcommereContext _context;

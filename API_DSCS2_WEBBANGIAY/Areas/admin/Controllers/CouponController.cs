@@ -1,4 +1,5 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
+    [Authorize(Roles = "COUPONMNG")]
+
     public class CouponController : ControllerBase
     {
         private readonly ShoesEcommereContext _context;
@@ -101,6 +104,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 if (coupon is null) return NotFound();
                 coupon.trangThai = true;
                 _context.Entry(coupon).State = EntityState.Modified;
+                _context.SaveChanges();
+
                 return Ok();
             }
             catch (Exception)
@@ -117,6 +122,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 if (coupon is null) return NotFound();
                 coupon.trangThai = false;
                 _context.Entry(coupon).State = EntityState.Modified;
+                _context.SaveChanges(); 
                 return Ok();
             }
             catch (Exception)
