@@ -98,130 +98,144 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var trans = _context.Database.BeginTransaction();
             try
             {
+
                 if ((bool)!body?.DaNhapHang)
                 {
                     return BadRequest();
                 }
+                if (body.ChiTietNhapXuats.Count() <= 0 || body.ChiTietNhapXuats.All(x => x.deletedAT != null))
+                {
+                    return BadRequest("Đơn này đã hoàn trả toàn phần");
+                }
                 List<SanPham> parents = new List<SanPham>();
+                var phieuNhapXuat = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == body.Id);
+
                 foreach (var item in body.ChiTietNhapXuats)
                 {
-                    var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
-                    var chitietnhapxuat = _context.ChiTietNhapXuats.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.IDPN == item.IDPN);
-                    if (khohang is not null && khohang.SoLuongTon - item.SoLuong == 0 && khohang.SoLuongCoTheban - item.SoLuong == 0)
+                  if(item.deletedAT is  null)
                     {
-                       
-
-                        var sanpham = item.SanPhamNavigation;
-                        khohang.SoLuongTon -= item.SoLuong;
-                        khohang.SoLuongCoTheban -= item.SoLuong;
-                        if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
+                        var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
+                        var chitietnhapxuat = _context.ChiTietNhapXuats.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.IDPN == item.IDPN);
+                        if (khohang is not null && khohang.SoLuongTon - item.SoLuong == 0 && khohang.SoLuongCoTheban - item.SoLuong == 0)
                         {
-                            sanpham.SoLuongTon -= item.SoLuong;
-                            sanpham.SoLuongCoTheban -= item.SoLuong;
-                            //
-                            var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
-                            if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
+                            var sanpham = item.SanPhamNavigation;
+                            khohang.SoLuongTon -= item.SoLuong;
+                            khohang.SoLuongCoTheban -= item.SoLuong;
+                            if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
                             {
-                                var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
-                                if (pro != null)
+                                sanpham.SoLuongTon -= item.SoLuong;
+                                sanpham.SoLuongCoTheban -= item.SoLuong;
+                                //
+                                var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
+                                if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
                                 {
-                                    var index = parents.IndexOf(pro);
-                                    if (index >= 0)
+                                    var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
+                                    if (pro != null)
                                     {
-                                        parents[index].SoLuongCoTheban -= item.SoLuong;
-                                        parents[index].SoLuongTon -= item.SoLuong;
+                                        var index = parents.IndexOf(pro);
+                                        if (index >= 0)
+                                        {
+                                            parents[index].SoLuongCoTheban -= item.SoLuong;
+                                            parents[index].SoLuongTon -= item.SoLuong;
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    if (parent is not null)
+                                    {
+                                        parent.SoLuongCoTheban -= item.SoLuong;
+                                        parent.SoLuongTon -= item.SoLuong;
+                                        parents.Add(parent);
+                                    }
+                                }
+
+                                _context.Entry(sanpham).State = EntityState.Modified;
+                                _context.Entry(khohang).State = EntityState.Modified;
                             }
                             else
                             {
-                                if (parent is not null)
-                                {
-                                    parent.SoLuongCoTheban -= item.SoLuong;
-                                    parent.SoLuongTon -= item.SoLuong;
-                                    parents.Add(parent);
-                                }
+                                return BadRequest();
                             }
+                            //_context.ChiTietNhapXuats.Remove(item);
+                            //_context.Entry(item).State = EntityState.Modified;
+                            //phieuNhapXuat.ChiTietNhapXuats.Remove(item);
+                        }
+                        else if (khohang is not null && khohang.SoLuongTon - item.SoLuong > 0 && khohang.SoLuongCoTheban - item.SoLuong > 0)
+                        {
+                            var sanpham = item.SanPhamNavigation;
+                            khohang.SoLuongTon -= item.SoLuong;
+                            khohang.SoLuongCoTheban -= item.SoLuong;
+                            if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
+                            {
+                                sanpham.SoLuongTon -= item.SoLuong;
+                                sanpham.SoLuongCoTheban -= item.SoLuong;
+                                //
+                                var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
+                                if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
+                                {
+                                    var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
+                                    if (pro != null)
+                                    {
+                                        var index = parents.IndexOf(pro);
+                                        if (index >= 0)
+                                        {
+                                            parents[index].SoLuongCoTheban -= item.SoLuong;
+                                            parents[index].SoLuongTon -= item.SoLuong;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (parent is not null)
+                                    {
+                                        parent.SoLuongCoTheban -= item.SoLuong;
+                                        parent.SoLuongTon -= item.SoLuong;
+                                        parents.Add(parent);
+                                    }
+                                }
 
-                            _context.Entry(sanpham).State = EntityState.Modified;
-                            _context.Entry(khohang).State = EntityState.Modified;
+                                _context.Entry(sanpham).State = EntityState.Modified;
+                                _context.Entry(khohang).State = EntityState.Modified;
+                            }
+                            else
+                            {
+                                return BadRequest();
+                            }
                         }
                         else
                         {
                             return BadRequest();
-                        }
-                        _context.ChiTietNhapXuats.Remove(item);
-                        _context.Entry(item).State = EntityState.Modified;
-                        body.ChiTietNhapXuats.Remove(item);
-                    }
-                    else if (khohang is not null && khohang.SoLuongTon-item.SoLuong > 0 && khohang.SoLuongCoTheban - item.SoLuong > 0)
-                    {
-                        var sanpham = item.SanPhamNavigation;
-                        khohang.SoLuongTon -= item.SoLuong;
-                        khohang.SoLuongCoTheban -= item.SoLuong;
-                        if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
-                        {
-                            sanpham.SoLuongTon -= item.SoLuong;
-                            sanpham.SoLuongCoTheban -= item.SoLuong;
-                            //
-                            var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
-                            if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
-                            {
-                                var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
-                                if (pro != null)
-                                {
-                                    var index = parents.IndexOf(pro);
-                                    if (index >= 0)
-                                    {
-                                        parents[index].SoLuongCoTheban -= item.SoLuong;
-                                        parents[index].SoLuongTon -= item.SoLuong;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (parent is not null)
-                                {
-                                    parent.SoLuongCoTheban -= item.SoLuong;
-                                    parent.SoLuongTon -= item.SoLuong;
-                                    parents.Add(parent);
-                                }
-                            }
 
-                            _context.Entry(sanpham).State = EntityState.Modified;
-                            _context.Entry(khohang).State = EntityState.Modified;
+                        }
+                        phieuNhapXuat.TongSoLuong -= item.SoLuong;
+                        if(phieuNhapXuat.ChietKhau>0)
+                        {
+                            float ChietKhauValue =(float)phieuNhapXuat.ChietKhau / 100;
+                            phieuNhapXuat.ThanhTien =(phieuNhapXuat.ThanhTien /(decimal)ChietKhauValue);
+                            phieuNhapXuat.ThanhTien -= item.ThanhTien;
+                            phieuNhapXuat.ThanhTien = (decimal)(phieuNhapXuat.ThanhTien * (decimal)ChietKhauValue);
+                        }
+                        if (chitietnhapxuat.SoLuong == item.SoLuong)
+                        {
+                            chitietnhapxuat.deletedAT = DateTime.Now;
+                            _context.Entry(chitietnhapxuat).State = EntityState.Modified;
                         }
                         else
                         {
-                            return BadRequest();
+                            
+                            chitietnhapxuat.SoLuong -= item.SoLuong;
+                            chitietnhapxuat.ThanhTien -= item.ThanhTien;
+                            _context.Entry(chitietnhapxuat).State = EntityState.Modified;
                         }
-                    }
-                    else
-                    {
-                        return BadRequest();
-
-                    }
-                    if (chitietnhapxuat.SoLuong == item.SoLuong)
-                    {
-                        item.deletedAT = DateTime.Now;
-                        body.ChiTietNhapXuats.Remove(item);
-                        _context.Entry(item).State = EntityState.Modified;
-                    }
-                    else
-                    {
-                        chitietnhapxuat.SoLuong -= item.SoLuong;
-                        chitietnhapxuat.ThanhTien -= item.ThanhTien;
-                        body.ThanhTien -= item.DonGia;
-                        body.TongSoLuong -= item.SoLuong;
-                        _context.Entry(item).State = EntityState.Modified;
                     }
 
                 }
 
                 _context.SanPhams.UpdateRange(parents);
-                body.status = -1;
-                body.DaTraHang = true;
-                _context.Entry(body).State = EntityState.Modified;
+                phieuNhapXuat.status = -1;
+                phieuNhapXuat.DaTraHang = true;
+                _context.Entry(phieuNhapXuat).State = EntityState.Modified;
                 await trans.CommitAsync();
                 await _context.SaveChangesAsync();
                 return Ok(body);

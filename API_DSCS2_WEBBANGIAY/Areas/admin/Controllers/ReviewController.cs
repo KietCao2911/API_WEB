@@ -114,6 +114,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var order = _context.PhieuNhapXuats.FirstOrDefault(t => t.Id == body[0].IDDonHang);
                 order.DaReview = true;
                 _context.Entry(order).State = EntityState.Modified;
+                foreach (var star in tempArr)
+                {
+                    _context.Entry(star).State = EntityState.Modified; 
+                }
                 _context.SaveChanges();
                 return Ok(body);
             }

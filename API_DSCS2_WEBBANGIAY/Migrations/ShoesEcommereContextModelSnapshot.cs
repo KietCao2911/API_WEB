@@ -335,6 +335,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<int>("LoaiKhuyenMai")
                         .HasColumnType("int");
 
+                    b.Property<string>("MaChiNhanh")
+                        .HasColumnType("char(20)");
+
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
 
@@ -363,6 +366,10 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("MaCoupon");
+
+                    b.HasIndex("MaChiNhanh")
+                        .IsUnique()
+                        .HasFilter("[MaChiNhanh] IS NOT NULL");
 
                     b.ToTable("Coupons");
                 });
@@ -475,11 +482,20 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("TenTaiKhoan")
                         .HasColumnType("char(50)");
 
-                    b.Property<int?>("WardID")
-                        .HasColumnType("int");
+                    b.Property<string>("WardID")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WardName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("createdAT")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("deletedAT")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("updatedAT")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("ID");
 
@@ -1085,6 +1101,13 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         {
                             RoleCode = "MEMANAGER",
                             RoleGroup = "ADMIN",
+                            Type = "",
+                            isActive = false
+                        },
+                        new
+                        {
+                            RoleCode = "MEMANAGER",
+                            RoleGroup = "USER",
                             Type = "",
                             isActive = false
                         },
@@ -1860,6 +1883,15 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("SanPhamNavigation");
                 });
 
+            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Coupon", b =>
+                {
+                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.Branchs", "ChiNhanhNavigation")
+                        .WithOne("CouponNavigation")
+                        .HasForeignKey("API_DSCS2_WEBBANGIAY.Models.Coupon", "MaChiNhanh");
+
+                    b.Navigation("ChiNhanhNavigation");
+                });
+
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Coupons_KhachHang", b =>
                 {
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.Coupon", "CouponNavigation")
@@ -2146,6 +2178,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Branchs", b =>
                 {
+                    b.Navigation("CouponNavigation");
+
                     b.Navigation("KhoHangs");
 
                     b.Navigation("PhieuNhapXuats");

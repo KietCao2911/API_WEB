@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace API_DSCS2_WEBBANGIAY.Models
 {
@@ -22,7 +23,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string? AddressDsc { get; set; }
         public int ?ProvinceID { get; set; }
         public int ?DistrictID  { get; set; }
-        public int ?WardID { get; set; }
+        public string ?WardID { get; set; }
+        public DateTime? createdAT { get; set; } = DateTime.Now;
+        public DateTime? updatedAT { get; set; } = DateTime.Now;
+        public DateTime? deletedAT { get; set; } 
         public virtual KhachHang KhachHangNavigation { get; set; }
         public virtual TaiKhoan TaiKhoanNavigation { get; set; }
         public virtual ICollection<Branchs> Branchs { get; set; }

@@ -118,6 +118,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
             foreach(var role in RoleGenerate())
             {
                 roleDetails.Add(new Models.RoleDetails { RoleCode = role.RoleCode, RoleGroup = "ADMIN" });
+                if(role.RoleCode== "MEMANAGER")
+                {
+                roleDetails.Add(new Models.RoleDetails { RoleCode = role.RoleCode, RoleGroup = "USER" });
+                }
             }
             return roleDetails;
         }
@@ -198,7 +202,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.HasKey(e => e.MaCoupon);
 
                 entity.Property(x => x.MaCoupon).HasColumnType("char(15)");
-
+                entity.HasOne(e => e.ChiNhanhNavigation).WithOne(x => x.CouponNavigation).HasForeignKey<Coupon>(e => e.MaChiNhanh);
             });
             modelBuilder.Entity<ChiTietCoupon>(entity =>
             {

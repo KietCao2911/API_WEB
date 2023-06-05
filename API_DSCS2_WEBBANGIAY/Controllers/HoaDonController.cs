@@ -82,6 +82,18 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 redirect=paymentUrl,
             });
         }
+        [HttpGet("GetOrderByID/{id}")]
+        public async Task<IActionResult>GetOrderByID(int id)
+        {
+            try
+            {
+                var order = _context.PhieuNhapXuats.Include(x=>x.ChiTietNhapXuats).ThenInclude(x=>x.SanPhamNavigation).Include(x=>x.DiaChiNavigation).FirstOrDefault(x => x.Id == id);
+                return order is not null ? Ok(order) : NotFound();
+            }catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
         private bool CheckQTY(PhieuNhapXuat body)
         {
             try
@@ -150,10 +162,10 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             {
                 return false;
             }
-            //if (coupon.SoLuong <= 0)
-            //{
-            //    return false;
-            //}
+            if (coupon.SoLuong <= 0)
+            {
+                return false;
+            }
             return true;
         }
         [HttpPost("ApplyCoupon")]
@@ -163,19 +175,28 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             if (couponCode == null) return BadRequest();
             var coupon = _context.Coupons.Include(x=>x.ChiTietCoupons).FirstOrDefault(x => x.MaCoupon.Trim() == couponCode.Trim());
             if (coupon == null) return NotFound();
-            if(checkDieuKien(coupon,body)&&checkNhomDoiTuong(coupon,body))
+            if (coupon.NgayKetThuc <= DateTime.Now ) return BadRequest("Coupon đã hết hạn");
+            if (!coupon.trangThai) return BadRequest("Coupon không khả dụng");
+            if(coupon.MaChiNhanh is not null && coupon.MaChiNhanh.Length>0)
+            {
+                if(coupon.MaChiNhanh.Trim() != body.MaChiNhanh.Trim())
+                {
+                    return BadRequest("Coupon không khả dụng tại chi nhánh này");
+                }
+            }
+            if (checkDieuKien(coupon,body)&&checkNhomDoiTuong(coupon,body))
             {
                 body.CouponNavigation = coupon;
                 if(coupon.LoaiKhuyenMai==1)
                 {
                     var tienGiam = (coupon.GiaTri * body.ThanhTien) / 100;
-                    body.TienDaGiam = tienGiam;
+                    body.TienDaGiam = tienGiam ;
                     body.ThanhTien -= tienGiam;
                 }
                 else if(coupon.LoaiKhuyenMai==2)
                 {
                     var tienGiam = coupon.GiaTri ;
-                    body.TienDaGiam = tienGiam;
+                    body.TienDaGiam = tienGiam ;
                     body.ThanhTien -= tienGiam;
                 }
                 else
@@ -217,20 +238,18 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 var hd = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == orderId);
                 if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
                 {
-                    hd.status = 1;
-                    //hd.DaThanhToan = true;
-                    if(hd.idTaiKhoan is not null)
-                    {
-                        var tk = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan == hd.idTaiKhoan);
-                        if(tk is not null)
-                        {
-                            tk.TienThanhToan += hd.ThanhTien;
-                            tk.SoLanMuaHang++;
-                            _context.Entry(tk).State = EntityState.Modified;
-                        }
-                    }
-                    hd.TienDaThanhToan = vnp_Amount;
-                    _context.PhieuNhapXuats.Update(hd);
+                    //hd.status = 1;
+                    //if(hd.idTaiKhoan is not null)
+                    //{
+                    //    var tk = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan == hd.idTaiKhoan);
+                    //    if(tk is not null)
+                    //    {
+                    //        tk.TienThanhToan += hd.ThanhTien;
+                    //        tk.SoLanMuaHang++;
+                    //        _context.Entry(tk).State = EntityState.Modified;
+                    //    }
+                    //}
+                    //_context.PhieuNhapXuats.Update(hd);
                     var ClientURL = _configuration.GetSection("ClientURL").Value;
                     var token = JWTHandler.Generate(DateTime.Now.AddDays(1));
                     await _context.SaveChangesAsync();
@@ -249,38 +268,6 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
             }
                 return Ok();
         }
-        //[HttpPost("PostWithUser")]
-        //public async Task<IActionResult> PostWithUser([FromBody] DonhangModel body)
-        //{
-        //    if (body.HoaDon.PhuongThucThanhToan == "COD")
-        //    {
-        //        var HoaDon = await CreateOrder(body);
-        //        if (HoaDon == null)
-        //        {
-        //            return BadRequest();
-        //        }
-        //        List<ChiTietHoaDon> cthd = new List<ChiTietHoaDon>();
-        //        foreach (var item in body.hoaDonDetails)
-        //        {
-
-        //            var chitietHoaDon = _context.ChiTietHoaDons.Include(x => x.MasanPhamNavigation).Include(x => x.SizePhamNavigation)
-        //                .Include(x => x.MausacPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).FirstOrDefault(x => x.IdHoaDon == item.IdHoaDon);
-        //            cthd.Add(chitietHoaDon);
-        //        }
-        //        await mailService.SendEmailAsync(new MailRequest { ToEmail = "truongkiet.hn289@gmail.com", Subject = "Xác nhận đơn hàng", Body = FillData.Teamplate(HoaDon, cthd) });
-        //        return Ok();
-        //    }
-        //    else
-        //    {
-        //        var HoaDon = await CreateOrder(body);
-        //        var tk = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan.Trim() == HoaDon.HoaDon.idTaiKhoan.Trim());
-        //        tk.TienThanhToan = HoaDon.HoaDon.TienThanhToan;
-        //        _context.TaiKhoans.Update(tk);
-        //        await _context.SaveChangesAsync();
-        //        return await VNPAY(HoaDon);
-        //    }
-        //        return Ok();
-        //}
         private PhieuNhapXuat order(PhieuNhapXuat body)
         {
             try

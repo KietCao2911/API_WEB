@@ -81,6 +81,9 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                     case "most-view":
                             products = products.OrderByDescending(h => h.SanPhamNavigation.ViewCount);
                         break;
+                    case "sale":
+                        products = products.Where(x => x.SanPhamNavigation.TienDaGiam > 0);
+                        break;
                     default:
                         products = products.OrderBy(s => s.SanPhamNavigation.GiaBanLe);
                         break;

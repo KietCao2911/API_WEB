@@ -14,6 +14,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
         public string MaCoupon { get; set; }
         public string TenCoupon { get; set; } = "";
+        public string? MaChiNhanh { get; set; }
         public DateTime NgayBatDau { get; set; }
         public DateTime NgayKetThuc { get; set; }
         public int SoLanDung { get; set; } = 0;
@@ -25,8 +26,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int LoaiKhuyenMai { get; set; } 
         public int NhomDoiTuong { get; set; }
         public string MoTa { get; set; } = "";
+        public virtual Branchs ChiNhanhNavigation { get; set; }
         public virtual ICollection<PhieuNhapXuat> PhieuNhapXuats { get; set; }
-        public virtual ICollection<ChiTietCoupon    > ChiTietCoupons { get; set; }
+        public virtual ICollection<ChiTietCoupon> ChiTietCoupons { get; set; }
         public virtual ICollection<Coupons_KhachHang> CouponsKhachHang { get; set; }
 
     }

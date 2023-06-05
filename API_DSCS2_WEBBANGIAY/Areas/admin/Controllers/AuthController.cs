@@ -1,5 +1,6 @@
 ﻿using API_DSCS2_WEBBANGIAY.Areas.admin.Models;
 using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils;
 using API_DSCS2_WEBBANGIAY.Utils.Mail;
 using API_DSCS2_WEBBANGIAY.Utils.Mail.TemplateHandle;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -80,6 +82,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         addressDefault = user.addressDefault,
                         avatar= user.Avatar,
                         nameDisplay = user.TenHienThi,
+                        email= user.Email,
                     }
 
                 });;;
@@ -126,6 +129,65 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 return BadRequest();
             }
         }
+        [HttpPost("ResetPassword")]
+        public  IActionResult ResetPassword( ResetPasswordParams body)
+        {
+            var verifyToken = JWTHandler.VerifyToken(body.Token);
+            if (verifyToken)
+            {
+                var user = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan.Trim() == body.tenTaiKhoan.Trim());
+                if(user is not null)
+                {
+                    user.MatKhau = body.newPassword;
+                    _context.Entry(user).State = EntityState.Modified;
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound("Không tìm thấy người dùng này");
+                }
+            }
+            else
+            {
+                return BadRequest("Mã token sai định dạng.");
+            }
+        }
+        [HttpGet("RequestResetPassword/{email}")]
+        public async Task<IActionResult> RequestResetPassword(string email)
+        {
+            var trans = _context.Database.BeginTransaction();
+            try
+            {
+                var userEmail = _context.TaiKhoans.FirstOrDefault(x => x.Email.Trim() == email.Trim());
+                if(userEmail is not null)
+                {
+                    var ClientURL = Startup.Configuration.GetSection("ClientURL").Value;
+                    var token = JWTHandler.Generate(DateTime.Now.AddDays(5));
+                    if (token is null) return BadRequest("");
+                    var link = ClientURL + "/reset_password/" + token+"/"+userEmail.TenTaiKhoan.Trim();
+                    var bodyString = await new ResetPassword(_HostEnvironment).RenderBody(link);
+                    var mailBody = new MailRequest()
+                    {
+                        Body = bodyString.ToString(),
+                        Subject = "Thay đổi mật khẩu",
+                        ToEmail = email,
+                    };
+                    var mailSend = new MailService(mailSettings);
+                    mailSend.SendEmailAsync(mailBody);
+                    await trans.CommitAsync();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound("Không tìm thấy email này");
+                }
+            }catch(Exception err)
+            {
+                trans.Rollback();
+                return BadRequest();
+            }
+        }
         [HttpPost("EmailRegister")]
         public async Task<IActionResult> EmailRegister(TaiKhoan body)
         {
@@ -135,12 +197,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var user = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan == body.TenTaiKhoan);
                 if (user is  null)
                 {
+                    body.Email = body.TenTaiKhoan;
                     body.RoleGroup = "USER";
                     _context.TaiKhoans.Add(body);
                     _context.SaveChanges();
+                    var ClientURL = Startup.Configuration.GetSection("ClientURL").Value;
                     var token = Generate(body, DateTime.Now.AddDays(15));
                     if (token is null) return BadRequest("");
-                    var link = "http://localhost:3000/verify_email/" + token;
+                    var link = ClientURL+ "/verify_email/" + token;
                     var bodyString = await new EmailVerify(_HostEnvironment).RenderBody(link);
                     var mailBody = new MailRequest()
                     {

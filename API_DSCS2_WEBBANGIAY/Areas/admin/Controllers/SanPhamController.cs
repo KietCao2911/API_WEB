@@ -39,7 +39,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
             try
             {
-                pageSize = pageSize == 0 ? 20 : pageSize;
+                pageSize = pageSize == 0 ? 10 : pageSize;
                 IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
                 products = _context.SanPhams.
                       Include(x => x.ChiTietHinhAnhs).
@@ -68,6 +68,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         break;
                     case "date-newest":
                         products = products.OrderByDescending(s => s.CreatedAt);
+                        break;
+                    case "sale":
+                        products = products.Where(x=>x.TienDaGiam>0);
                         break;
                     default:
                         products = products.OrderBy(s => s.GiaBanLe);
@@ -226,14 +229,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 ReviewStar review = new ReviewStar();
                 _context.ReviewStars.Add(review);
                 _context.SaveChanges();
-                body.ReviewID = review.Id;
-
                 if (body.MaSanPham == null || body.MaSanPham.Length == 0)
                 {
                     var ID = new GenKey();
                     _context.Keys.Add(ID);
                     await _context.SaveChangesAsync();
-                    body.MaSanPham = "CTK0" + ID.ID.ToString();
+                    body.MaSanPham = "SKU0" + ID.ID.ToString();
                     body.Slug = CustomSlug.Slugify(body.TenSanPham) + "_" + body.MaSanPham;
                 }
                 
@@ -250,7 +251,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             //products[i].IDVat = body.IDVat;
                             //products[i].IDBrand = body.IDBrand;
                             //products[i].IDType = body.IDType;
-                            products[i].ReviewID = review.Id;
                             products[i].MaSanPham = "SKU0" + ID.ID.ToString();
                             products[i].ParentID = body.MaSanPham;
                             products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;
@@ -258,7 +258,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         }
                     }
                 }
-              
+                body.ReviewID = review.Id;
                 _context.SanPhams.Add(body);
                 await _context.SaveChangesAsync();
                 await trans.CommitAsync();

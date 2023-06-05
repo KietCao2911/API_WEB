@@ -16,6 +16,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? IDAddress { get; set; }
         public bool? isDefault { get; set; } = false;
         public DiaChi DiaChiNavigation { get; set; }
+        public Coupon CouponNavigation { get; set; }
         public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }
         public virtual ICollection<PhieuNhapXuat> PhieuNhapXuats { get; set; }
 

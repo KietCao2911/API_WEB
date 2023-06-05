@@ -37,7 +37,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/DonHang
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetHoaDons([FromQuery(Name = "status")] string status)
+        public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetHoaDons([FromQuery(Name = "status")] string status, [FromQuery(Name = "page")] int? page, 
+            [FromQuery(Name = "pageSize")] int? pageSize)
         {
             try
             {
@@ -57,7 +58,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         break;
 
                 }
-                return Ok(phieuxuats);
+                var result = await PaggingService<PhieuNhapXuat>.CreateAsync((IQueryable<PhieuNhapXuat>)phieuxuats, page ?? 1, pageSize??10);
+                return Ok(result);
             }catch (Exception ex)
             {
                 return BadRequest(ex.Message);  
@@ -90,12 +92,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 foreach (var x in body.ChiTietNhapXuats)
                 {
                     var product = x.SanPhamNavigation;
-                    var khohang = await _context.KhoHangs.Include(x => x.SanPhamNavigation).FirstOrDefaultAsync(k => k.MaSanPham.Trim() == x.MaSanPham.Trim()&&k.MaChiNhanh.Trim() == body.MaChiNhanh.Trim());
+                    var khohang = await _context.KhoHangs.Include(x => x.SanPhamNavigation).FirstOrDefaultAsync(k => k.MaSanPham.Trim() == x.MaSanPham.Trim() && k.MaChiNhanh.Trim() == body.MaChiNhanh.Trim());
+                    x.TenPhieu = "Xuất hàng khỏi kho";
                     if (product != null&&khohang !=null)
                     {
                         //KhoHang update
                         if(khohang.SoLuongCoTheban>=x.SoLuong&&khohang.SoLuongTon>=x.SoLuong)
                         {
+                            
                             khohang.SoLuongTon -=x.SoLuong;
                             khohang.SoLuongCoTheban-=x.SoLuong;
                         }
@@ -117,7 +121,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         //Parent Update
                         if(product is not null && product.SoLuongTon >= 0 && product.SoLuongCoTheban >= 0)
                         {
-                            var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == x.SanPhamNavigation.ParentID);
+                            var parent = _context.SanPhams.FirstOrDefault(temp => temp.MaSanPham == x.SanPhamNavigation.ParentID);
                             if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
                             {
                                 var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
@@ -128,6 +132,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                     {
                                         parents[index].SoLuongCoTheban -= x.SoLuong;
                                         parents[index].SoLuongTon -= x.SoLuong;
+                                        parents[index].SoLuongDaBan += x.SoLuong; ;
                                     }
                                 }
                             }
@@ -137,6 +142,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                 {
                                     parent.SoLuongCoTheban -= x.SoLuong;
                                     parent.SoLuongTon -= x.SoLuong;
+                                    parent.SoLuongDaBan += x.SoLuong; ;
                                     parents.Add(parent);
                                 }
                             }
@@ -148,6 +154,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         }
                         _context.Entry(product).State = EntityState.Modified;
                         _context.Entry(khohang).State = EntityState.Modified;
+                        _context.Entry(x).State = EntityState.Modified;
                     }
              
                     else
@@ -163,7 +170,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 await _context.SaveChangesAsync();
                 trans.Commit(); 
                 return Ok(body);
-
             }
             catch (Exception ex)
             {
@@ -176,8 +182,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                body.DaXuatKho = true;
                 body.steps = 4;
+                body.DaNhanHang = true;
                 body.status = 1;
                 _context.Entry(body).State = EntityState.Modified;
                 var clientURL = _config.GetSection("ClientURL").Value;
@@ -189,7 +195,28 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     Body = bodyString.ToString(),
                     Subject = "ĐÁNH GIÁ",
                     ToEmail = body.DiaChiNavigation?.Email,
+
                 };
+                if(body.idTaiKhoan is not null)
+                {
+                    var user = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan.Trim() == body.idTaiKhoan.Trim());
+                    if(user is not null)
+                    {
+                        user.SoLanMuaHang++;
+                        user.TienThanhToan += body.ThanhTien;
+                        _context.Entry(user).State = EntityState.Modified;
+                    }
+                }
+                if(body.CouponCode is not null)
+                {
+                    var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == body.CouponCode);
+                    if(coupon is not null)
+                    {
+                        coupon.SoLuong--;
+                        _context.Entry(coupon.SoLuong).State = EntityState.Modified;
+
+                    }
+                }
                 var mailSend = new MailService(mailSettings);
                 mailSend.SendEmailAsync(mailBody);
                 return true;
@@ -213,6 +240,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 phieuThu.LoaiPhieu = "PHIEUTHU";
                 phieuThu.PhuongThucThanhToan = body.PhuongThucThanhToan;
                 phieuThu.MaChiNhanh = body.MaChiNhanh;
+                if(body.idTaiKhoan is not null)
+                {
+                    var taikhoan = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan == body.idTaiKhoan);
+                    if(taikhoan is not null)
+                    {
+                        taikhoan.TienThanhToan += body.ThanhTien;
+                        taikhoan.SoLanMuaHang++;
+                        _context.Entry(taikhoan).State = EntityState.Modified;
+                    }
+                }
                 await DaGiaoHang(body);
                 _context.Entry(body).State = EntityState.Modified;
                 _context.PhieuNhapXuats.Add(phieuThu);
@@ -235,8 +272,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }
                 body.TienDaThanhToan -= body.ThanhTien;
                 body.DaHoanTien = true;
+                if (body.idTaiKhoan is not null)
+                {
+                    var taikhoan = _context.TaiKhoans.FirstOrDefault(x => x.TenTaiKhoan == body.idTaiKhoan);
+                    if (taikhoan is not null)
+                    {
+                        taikhoan.TienThanhToan -= body.ThanhTien;
+                        taikhoan.SoLanMuaHang--;
+                        _context.Entry(taikhoan).State = EntityState.Modified;
+                    }
+                }
                 PhieuNhapXuat phieuChi = new PhieuNhapXuat();
-                phieuChi.TienDaThanhToan = body.ThanhTien;
+                phieuChi.TienDaThanhToan = body.TienDaThanhToan;
                 phieuChi.LoaiPhieu = "PHIEUCHI";
                 phieuChi.PhuongThucThanhToan = body.PhuongThucThanhToan;
                 phieuChi.MaChiNhanh = body.MaChiNhanh;
@@ -272,6 +319,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 body.status = -1;
                 _context.Entry(body).State = EntityState.Modified;
+                if (body.CouponCode is not null)
+                {
+                    var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == body.CouponCode);
+                    if (coupon is not null)
+                    {
+                        coupon.SoLuong--;
+                        _context.Entry(coupon.SoLuong).State = EntityState.Modified;
+
+                    }
+                }
                 _context.SaveChanges();
                 return Ok(body); 
             }
@@ -286,88 +343,104 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var trans = _context.Database.BeginTransaction();
             try
             {
-                if (body.ChiTietNhapXuats.Count() <= 0||body.ChiTietNhapXuats.Any(x=>x.SoLuong<=0))
+
+                if (body.ChiTietNhapXuats.Count() <= 0||body.ChiTietNhapXuats.All(x=>x.deletedAT!=null))
                 {
                     return BadRequest("Giá trị không hợp lệ");
                 }
-                else if((bool)body.DaNhanHang)
-                {
-                    return BadRequest("Đơn này đã nhập hàng.");
-                }
+                
                 List<SanPham> parents = new List<SanPham>();
+                var phieuNhapXuat = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == body.Id);
                 foreach (var item in body.ChiTietNhapXuats)
                 {
-                    var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
-                    var chitietnhapxuat = _context.ChiTietNhapXuats.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.IDPN == item.IDPN);
-                   
-                    if (khohang is not null)
+                    if (item.deletedAT is null)
                     {
+                        var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == body.MaChiNhanh);
+                        var chitietnhapxuat = _context.ChiTietNhapXuats.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.IDPN == item.IDPN);
 
-                        var sanpham = item.SanPhamNavigation;
-                        khohang.SoLuongTon += item.SoLuong;
-                        khohang.SoLuongCoTheban += item.SoLuong;
-                        if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
+                        if (khohang is not null)
                         {
-                            sanpham.SoLuongTon += item.SoLuong;
-                            sanpham.SoLuongCoTheban += item.SoLuong;
-                            //
-                            var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
-                            if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
+
+                            var sanpham = item.SanPhamNavigation;
+                            khohang.SoLuongTon += item.SoLuong;
+                            khohang.SoLuongCoTheban += item.SoLuong;
+                            if (sanpham is not null && sanpham.SoLuongTon >= 0 && sanpham.SoLuongCoTheban >= 0)
                             {
-                                var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
-                                if (pro != null)
+                                sanpham.SoLuongTon += item.SoLuong;
+                                sanpham.SoLuongCoTheban += item.SoLuong;
+                                sanpham.SoLuongDaBan -= item.SoLuong;
+                                //
+                                var parent = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == item.SanPhamNavigation.ParentID);
+                                if (parent is not null && parents.Any(x => x.MaSanPham == parent.MaSanPham))
                                 {
-                                    var index = parents.IndexOf(pro);
-                                    if (index >= 0)
+                                    var pro = parents.FirstOrDefault(x => x.MaSanPham == parent.MaSanPham);
+                                    if (pro != null)
                                     {
-                                        parents[index].SoLuongCoTheban += item.SoLuong;
-                                        parents[index].SoLuongTon += item.SoLuong;
+                                        var index = parents.IndexOf(pro);
+                                        if (index >= 0)
+                                        {
+                                            parents[index].SoLuongCoTheban += item.SoLuong;
+                                            parents[index].SoLuongTon += item.SoLuong;
+                                            parents[index].SoLuongDaBan -= item.SoLuong; ;
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    if (parent is not null)
+                                    {
+                                        parent.SoLuongCoTheban += item.SoLuong;
+                                        parent.SoLuongTon += item.SoLuong;
+                                        parent.SoLuongDaBan -= item.SoLuong; ;
+                                        parents.Add(parent);
+                                    }
+                                }
+
+                                _context.Entry(sanpham).State = EntityState.Modified;
+                                _context.Entry(khohang).State = EntityState.Modified;
                             }
                             else
                             {
-                                if (parent is not null)
-                                {
-                                    parent.SoLuongCoTheban += item.SoLuong;
-                                    parent.SoLuongTon += item.SoLuong;
-                                    parents.Add(parent);
-                                }
+                                return BadRequest();
+                            }
+                            phieuNhapXuat.TongSoLuong -= item.SoLuong;
+                            phieuNhapXuat.ThanhTien -= item.ThanhTien;
+
+                            if (chitietnhapxuat.SoLuong == item.SoLuong)
+                            {
+                                chitietnhapxuat.deletedAT = DateTime.Now;
+                                _context.Entry(chitietnhapxuat).State = EntityState.Modified;
+                            }
+                            else
+                            {
+                                chitietnhapxuat.SoLuong -= item.SoLuong;
+                                chitietnhapxuat.ThanhTien -= item.ThanhTien;
+                                _context.Entry(chitietnhapxuat).State = EntityState.Modified;
                             }
 
-                            _context.Entry(sanpham).State = EntityState.Modified;
-                            _context.Entry(khohang).State = EntityState.Modified;
                         }
-                        else
-                        {
-                            return BadRequest();
-                        }
-                        if (chitietnhapxuat.SoLuong == item.SoLuong)
-                        {
-                            item.deletedAT = DateTime.Now;
-                            body.ChiTietNhapXuats.Remove(item);
-                            _context.Entry(item).State = EntityState.Modified;
-                        }
-                        else
-                        {
-                            chitietnhapxuat.SoLuong -= item.SoLuong;
-                            chitietnhapxuat.ThanhTien -= item.ThanhTien;
-                            body.ThanhTien -= item.DonGia;
-                            body.TongSoLuong -= item.SoLuong;
-                            _context.Entry(item).State = EntityState.Modified;
-                        }
-                       
                     }
+                 
                     
                 }
- 
+                if (phieuNhapXuat.CouponCode is not null)
+                {
+                    var coupon = _context.Coupons.FirstOrDefault(x => x.MaCoupon == body.CouponCode);
+                    if (coupon is not null)
+                    {
+                        coupon.SoLuong--;
+                        _context.Entry(coupon.SoLuong).State = EntityState.Modified;
+
+                    }
+                }
                 _context.SanPhams.UpdateRange(parents);
-                _context.Entry(body).State = EntityState.Modified;
-                body.status = -1;
-                body.DaTraHang =true;
-                await trans.CommitAsync();
+                _context.Entry(phieuNhapXuat).State = EntityState.Modified;
+                phieuNhapXuat.status = -1;
+                phieuNhapXuat.steps=-1;
+                phieuNhapXuat.DaTraHang =true;
                 await _context.SaveChangesAsync();
-                return Ok(body);
+                await trans.CommitAsync();
+                return Ok(phieuNhapXuat);
             }
             catch (Exception err)
                 {

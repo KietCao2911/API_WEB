@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API_DSCS2_WEBBANGIAY.Models;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.me.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "MEMANAGER")]
     [ApiController]
     public class MeController : ControllerBase
     {
@@ -84,7 +86,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.me.Controllers
                 var dc = await _context.DiaChis.FindAsync(id);
                 if (dc is not null)
                 {
-                    _context.DiaChis.Remove(dc);
+
+                    var taikhoan = _context.TaiKhoans.FirstOrDefault(x => x.addressDefault == id);
+                    if(taikhoan is not null)
+                    {
+                        taikhoan.addressDefault = null;
+
+                    _context.Entry(taikhoan).State = EntityState.Modified;
+                    }
+                    dc.deletedAT = DateTime.Now;
+                    _context.Entry(dc).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return Ok(id);
                 }
@@ -107,7 +118,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.me.Controllers
             {
                 return NotFound();
             }
-
             _context.TaiKhoans.Remove(taiKhoan);
             await _context.SaveChangesAsync();
 

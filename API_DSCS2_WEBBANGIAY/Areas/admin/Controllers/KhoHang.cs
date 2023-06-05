@@ -1,4 +1,5 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +23,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             _context = context;
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> Get(string id, [FromQuery(Name = "page")] int? page,
+            [FromQuery(Name = "pageSize")] int? pageSize)
         {
             try
             {
                 var khohangs = _context.KhoHangs.Include(x=>x.BranchNavigation).ThenInclude(x=>x.PhieuNhapXuats).Where(x => x.MaSanPham == id);
-                return Ok(khohangs);
+                var result = await PaggingService<ChiNhanh_SanPham>.CreateAsync((IQueryable<ChiNhanh_SanPham>)khohangs, page ?? 1, pageSize ?? 10);
+                return Ok(result);
             }
             catch(Exception err)
             {

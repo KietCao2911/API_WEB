@@ -17,7 +17,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     [Area("admin")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    [Authorize(Roles = "CATEMNG")]
+   
 
     public class DanhMucController : ControllerBase
     {
@@ -30,6 +30,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/DanhMuc
         [HttpGet]
+
         public async Task<IActionResult> GetDanhMucUI()
         {
             try
@@ -126,6 +127,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         // POST: api/DanhMuc
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "CATEMNG")]
         public async Task<ActionResult<DanhMuc>> PostDanhMuc(DanhMuc danhMuc)
         {
             if (String.IsNullOrEmpty(danhMuc.TenDanhMuc))  return BadRequest();
@@ -157,6 +159,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // DELETE: api/DanhMuc/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "CATEMNG")]
         public async Task<IActionResult> DeleteDanhMuc(int id)
         {
             var danhMuc = await _context.DanhMucs.FindAsync(id);

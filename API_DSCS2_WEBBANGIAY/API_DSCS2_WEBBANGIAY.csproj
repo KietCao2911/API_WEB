@@ -42,6 +42,7 @@
     <Folder Include="Areas\admin\Data\" />
     <Folder Include="Areas\admin\Views\" />
     <Folder Include="wwwroot\res\BstImgs\" />
+    <Folder Include="wwwroot\res\SanPhamRes\Imgs\" />
     <Folder Include="wwwroot\res\users\" />
     <Folder Include="wwwroot\res\SanPhamRes\Thumb\" />
   </ItemGroup>
