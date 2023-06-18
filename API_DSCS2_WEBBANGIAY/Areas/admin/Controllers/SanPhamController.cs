@@ -137,7 +137,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var sanPham = await _context.SanPhams
                 .Include(x => x.StarReviewNavigation).ThenInclude(x => x.StarReviewDetails)
                       .Include(x => x.SanPhams)
-                      .Include(x=>x.DanhMucDetails).                             
+                      ./*Include(x=>x.DanhMucDetails).*/                             
                       Include(x => x.SanPhams)
                        .ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                        .Include(x => x.VatNavigation)
@@ -160,31 +160,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var product = _context.SanPhams.Include(x => x.DanhMucDetails).AsNoTracking().FirstOrDefault(x => x.MaSanPham == sanPham.MaSanPham);
-                if (product.DanhMucDetails.Count > 0)
-                {
-                    bool check = IsAny(product.DanhMucDetails.ToList(), sanPham.DanhMucDetails.ToList());
-                    if (!check)
-                    {
-                        
-                        //_context.DanhMucDetails.RemoveRange(product.DanhMucDetails);
-                        foreach(var removeItem in product.DanhMucDetails)
-                        {
-
-                        _context.Entry(removeItem).State = EntityState.Deleted;
-                        }
-                        foreach (var addItem in sanPham.DanhMucDetails)
-                        {
-
-                            _context.Entry(addItem).State = EntityState.Added;
-                        }
-                        //_context.Entry(sanPham.DanhMucDetails).State = EntityState.Added;
-                        //_context.DanhMucDetails.AddRange(sanPham.DanhMucDetails);
-                    }
-                }
-                else
-                {
-                    _context.DanhMucDetails.AddRange(sanPham.DanhMucDetails);
-                }
                 foreach (var item in sanPham.SanPhams)
                 {
                     item.SanPhamNavigation = null;
@@ -217,6 +192,35 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             return true;
         }
+        [HttpPost("PostChildSanPham")]
+        public async Task<IActionResult> PostChildSanPham(List<SanPham> body)
+        {
+            try
+            {
+                if (body.Count < 0) return BadRequest();
+                _context.SanPhams.AddRange(body);
+                _context.SaveChanges();
+                return Ok(body);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpDelete("DeleteChildSanPham/{maSP}")]
+        public async Task<IActionResult> DeleteChildSanPham(string maSP)
+        {
+            try
+            {
+                var sanPham = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == maSP);
+                if (sanPham == null) return NotFound();
+                _context.SanPhams.Remove(sanPham);
+                _context.SaveChanges();
+                return Ok();
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
         // POST: api/SanPham
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -248,9 +252,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             var ID = new GenKey();
                             _context.Keys.Add(ID);
                             await _context.SaveChangesAsync();
-                            //products[i].IDVat = body.IDVat;
-                            //products[i].IDBrand = body.IDBrand;
-                            //products[i].IDType = body.IDType;
                             products[i].MaSanPham = "SKU0" + ID.ID.ToString();
                             products[i].ParentID = body.MaSanPham;
                             products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;

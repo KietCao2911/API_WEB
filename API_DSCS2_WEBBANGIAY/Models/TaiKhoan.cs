@@ -19,6 +19,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string? TenHienThi { get; set; } = "";
         public string? RoleGroup { get; set; } = "";
         public string TenTaiKhoan { get; set; }
+        public string TypeAccount { get; set; }
         public string MatKhau { get; set; }
         public bool isBlocked { get; set; } = false;
         public string Email { get; set; }

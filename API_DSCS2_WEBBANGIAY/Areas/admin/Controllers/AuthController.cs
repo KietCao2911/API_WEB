@@ -199,6 +199,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 {
                     body.Email = body.TenTaiKhoan;
                     body.RoleGroup = "USER";
+                    body.TypeAccount = "EMAIL";
                     _context.TaiKhoans.Add(body);
                     _context.SaveChanges();
                     var ClientURL = Startup.Configuration.GetSection("ClientURL").Value;
@@ -336,6 +337,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     TaiKhoan tk = new TaiKhoan();
                     tk.RoleGroup = "USER";
                     tk.isActive = true;
+                    tk.TypeAccount = "PHONE";
                     tk.TenTaiKhoan = body.UserName;
                     _context.TaiKhoans.Add(tk);
                     await _context.SaveChangesAsync();

@@ -21,6 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.SqlServer;
+using API_DSCS2_WEBBANGIAY.Utils;
 
 namespace API_DSCS2_WEBBANGIAY
 {
@@ -32,6 +33,7 @@ namespace API_DSCS2_WEBBANGIAY
 
         }
         public static IConfiguration Configuration { get; private set; }
+
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) 
@@ -59,13 +61,6 @@ namespace API_DSCS2_WEBBANGIAY
                 };
             });
             services.AddDistributedMemoryCache();
-            //services.AddSession(options =>
-            //{
-            //    options.Cookie.Name = ".AdventureWorks.Session";
-            //    options.IdleTimeout = TimeSpan.FromDays(1);
-            //    options.Cookie.HttpOnly = true;
-            //    options.Cookie.IsEssential = true;
-            //});
             services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 ).AddJsonOptions(options =>
@@ -81,6 +76,7 @@ namespace API_DSCS2_WEBBANGIAY
             });
             services.AddTransient<IMailService, MailService>();
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<ElasticSetting>(Configuration.GetSection("ElasticSearch"));
             services.AddSignalR();
         }
         

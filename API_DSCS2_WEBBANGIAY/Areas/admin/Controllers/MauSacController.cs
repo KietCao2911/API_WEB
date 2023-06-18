@@ -85,10 +85,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost]
         public async Task<ActionResult<MauSac>> PostMauSac(MauSac mauSac)
         {
-            _context.MauSacs.Add(mauSac);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMauSac", new { id = mauSac.MaMau }, mauSac);
+            try
+            {
+                _context.MauSacs.Add(mauSac);
+                await _context.SaveChangesAsync();
+                return Ok(mauSac);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
         }
 
         // DELETE: api/MauSac/5

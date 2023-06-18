@@ -28,7 +28,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             return await _context.DanhMucDetails.ToListAsync();
         }
-
+        [HttpGet("GetCategoryDetailByProduct/{maSP}")]
+        public  IActionResult GetCategoryDetailByProduct(string maSP)
+        {
+            try
+            {
+                var res = _context.DanhMucDetails.Include(x=>x.IdDanhMucNavigation).Where(x => x.MaSanPham.Trim() == maSP.Trim());
+                return Ok(res);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
         // GET: api/DanhMucDetails/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DanhMucDetails>> GetDanhMucDetails(int id)
@@ -76,16 +87,21 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // POST: api/DanhMucDetails
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{maSP}")]
-        public async Task<ActionResult<DanhMucDetails>> PostDanhMucDetails(DanhMuc dm,string maSP)
+        [HttpPost]
+        public async Task<ActionResult<DanhMucDetails>> PostDanhMucDetails(List<DanhMucDetails> body)
         {
             try
             {
-                if(dm != null)
+                   foreach(var item in body)
                 {
-                    TestFnc(ref dm, maSP);
+                    var dm = _context.DanhMucDetails.FirstOrDefault(x => x.danhMucId == item.danhMucId && x.MaSanPham == item.MaSanPham);
+                    if(dm is  null)
+                    {
+                 _context.DanhMucDetails.Add(item);
+                    }
                 }
-                    return Ok();
+                _context.SaveChanges();
+                    return Ok(body);
             }
             catch (DbUpdateException)
             {
@@ -95,15 +111,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         }
 
         // DELETE: api/DanhMucDetails/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDanhMucDetails(int id)
+        [HttpDelete("{idDM}/{idSP}")]
+        public async Task<IActionResult> DeleteDanhMucDetails(int idDM,string idSP)
         {
-            var danhMucDetails = await _context.DanhMucDetails.FindAsync(id);
+            var danhMucDetails = _context.DanhMucDetails.FirstOrDefault(x=>x.MaSanPham==idSP&&x.danhMucId==idDM);
             if (danhMucDetails == null)
             {
                 return NotFound();
             }
-
             _context.DanhMucDetails.Remove(danhMucDetails);
             await _context.SaveChangesAsync();
 

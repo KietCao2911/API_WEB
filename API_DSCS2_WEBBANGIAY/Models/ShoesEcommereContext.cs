@@ -659,7 +659,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 );
 
             modelBuilder.Entity<TaiKhoan>().HasData(
-                new TaiKhoan { TenTaiKhoan="admin",MatKhau="admin",RoleGroup="ADMIN"}
+                new TaiKhoan { TenTaiKhoan="admin",MatKhau="admin",RoleGroup="ADMIN",Email="truongkiet.hn290@gmail.com"}
                 );
             OnModelCreatingPartial(modelBuilder);
         }

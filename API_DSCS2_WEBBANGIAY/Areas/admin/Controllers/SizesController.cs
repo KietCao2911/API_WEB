@@ -32,82 +32,47 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             });
             return Ok(select);
         }
-
-        //// GET: api/Sizes/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Size>> GetSize(int id)
-        //{
-        //    var size = await _context.Sizes.FindAsync(id);
-
-        //    if (size == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return size;
-        //}
-
-        // PUT: api/Sizes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutSize(string id, Size size)
-        //{
-        //    if (id != size.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(size).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!SizeExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        // POST: api/Sizes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Size>> PostSize(Size size)
-        //{
-        //    _context.Sizes.Add(size);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetSize", new { id = size.Id }, size);
-        //}
-
-        // DELETE: api/Sizes/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteSize(int id)
-        //{
-        //    var size = await _context.Sizes.FindAsync(id);
-        //    if (size == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Sizes.Remove(size);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool SizeExists(string id)
-        //{
-        //    return _context.Sizes.Any(e => e.Id == id);
-        //}
+        [HttpPost]
+        public async Task<IActionResult>Post(Size body)
+        {
+            try
+            {
+                 _context.Sizes.Add(body);
+                _context.SaveChanges();
+                return Ok(body);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> Put(Size body)
+        {
+            try
+            {
+                _context.Entry(body).State = EntityState.Modified;
+                _context.SaveChanges();
+                return Ok();
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                var size = _context.Sizes.FirstOrDefault(x =>x.Id==id);
+                _context.Sizes.Remove(size);
+                _context.SaveChanges();
+                return Ok();
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+            }
+        }
     }
 }

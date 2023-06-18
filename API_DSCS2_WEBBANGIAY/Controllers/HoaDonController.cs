@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
+using Stripe;
+using Stripe.BillingPortal;
+using Stripe.Checkout;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -275,6 +278,10 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 body.steps = 1;
                 foreach (var item in body.ChiTietNhapXuats)
                 {
+                    if(item.SoLuong<=0)
+                    {
+                        return null;
+                    }
                     _context.Entry(item).State = EntityState.Added;
 
                 }
@@ -345,6 +352,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 }
                 body.PhuongThucThanhToan = "VNPAY";
                 var hoadon = order(body);
+                if (hoadon == null) return BadRequest();
                 return await VNPAY(hoadon);
             }
             catch (Exception ex)
@@ -383,6 +391,126 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 return BadRequest();
             }
         }
+        [HttpGet("/StripeSuccess/{id}")]
+        public async Task<IActionResult> StripeSuccess(int id)
+        {
+            try
+            {
+                var hd = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == id);
+                if (hd == null) return NotFound();
+                var ClientURL = _configuration.GetSection("ClientURL").Value;
+                var token = JWTHandler.Generate(DateTime.Now.AddDays(1));
+                return Redirect($"{ClientURL}/orderStatus/{hd.Id}/{token}");
+            }
+            catch(Exception err)
+            {
+                return BadRequest();
+            }
+            
+        }
+        [HttpGet("/StripeCancel/{id}")]
+        public async Task<IActionResult> StripeCancel(int id)
+        {
+            try
+            {
+                var hd = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == id);
+                if (hd == null) return NotFound();
+                _context.PhieuNhapXuats.Remove(hd);
+                _context.SaveChanges();
+                var ClientURL = _configuration.GetSection("ClientURL").Value;
+                var token = JWTHandler.Generate(DateTime.Now.AddDays(1));
+                return Redirect($"{ClientURL}/orderStatus/{hd.Id}/{token}");
+            }
+            catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
 
+        [HttpPost("StripePayment")]
+        public IActionResult OrderWithStripe(PhieuNhapXuat body)
+        {
+            try
+            {
+                if (body.ChiTietNhapXuats.Count <= 0)
+                {
+                    return BadRequest();
+                }
+                if (CheckQTY(body) == false)
+                {
+                    return BadRequest("Số lượng trong kho không cho phép");
+                }
+                body.PhuongThucThanhToan = "PAYPAL";
+                var hoadon = order(body);
+                if (hoadon == null) return BadRequest();
+                return CreateSessionStripePayment(hoadon);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
+        private IActionResult CreateSessionStripePayment(PhieuNhapXuat body)
+        {
+            try
+            {
+                StripeConfiguration.ApiKey = _configuration["StripeKey:SecretKey"];
+                var domain = _configuration["BaseURL"];
+                var items = new List<SessionLineItemOptions>();
+                    if (body.ChiTietNhapXuats.Count < 0) return BadRequest();
+               
+                var customerOtp = new CustomerCreateOptions
+                {
+                    Name = body.DiaChiNavigation.Name,
+                    Email = body.DiaChiNavigation.Email.Trim()
+                };
+                var customerService = new CustomerService();
+               //var customer =  customerService.Create(customerOtp);
+                //var invoiceOtp = new InvoiceCreateOptions
+                //{
+                //    Customer = customer.Id,
+                //    Currency="vnd",
+                    
+                    
+                //};
+                var invoiceService = new InvoiceService();
+                //var invoice = invoiceService.Create(invoiceOtp);
+
+                var options = new Stripe.Checkout.SessionCreateOptions
+                {
+                    LineItems = new List<SessionLineItemOptions>
+                    {
+                        new SessionLineItemOptions
+                        {
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                UnitAmount = Convert.ToInt32(body.ThanhTien),
+                                Currency = "vnd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = "Checkout for order #" + body.Id
+                                }
+                            },
+                            Quantity = body.TongSoLuong
+                        }
+                    },
+                    Mode = "payment",
+                    SuccessUrl = domain + "StripeSuccess/" + body.Id,
+                    CancelUrl = domain + "StripeCancel" + body.Id,
+                    CustomerEmail = body.DiaChiNavigation.Email.Trim(),
+                     
+                    InvoiceCreation = new SessionInvoiceCreationOptions
+                    {
+                        Enabled = true
+                    }
+                };
+                //var invoice = 
+                var service = new Stripe.Checkout.SessionService();
+                Stripe.Checkout.Session session = service.Create(options);
+                return Ok(session.Url);
+            }catch(Exception err)
+            {
+                return BadRequest();
+            }
+        }
     }
 }

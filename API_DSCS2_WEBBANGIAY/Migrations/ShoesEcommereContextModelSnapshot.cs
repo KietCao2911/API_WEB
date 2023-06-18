@@ -1598,6 +1598,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<float>("Rating")
                         .HasColumnType("real");
 
+                    b.Property<bool>("isDisplay")
+                        .HasColumnType("bit");
+
                     b.HasKey("StarReviewID", "IDDonHang", "ID");
 
                     b.HasIndex("IDDonHang");
@@ -1650,6 +1653,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<decimal?>("TienThanhToan")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("TypeAccount")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("addressDefault")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -1680,6 +1686,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         {
                             TenTaiKhoan = "admin",
                             Avatar = "",
+                            Email = "truongkiet.hn290@gmail.com",
                             MatKhau = "admin",
                             RoleGroup = "ADMIN",
                             SoLanMuaHang = 0,
