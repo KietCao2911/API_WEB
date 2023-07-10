@@ -352,6 +352,15 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 }
                 body.PhuongThucThanhToan = "VNPAY";
                 var hoadon = order(body);
+                var bodyString = await new Confirm(_HostEnvironment, body).RenderBody();
+                var mailBody = new MailRequest()
+                {
+                    Body = bodyString.ToString(),
+                    Subject = "XÁC NHẬN ĐƠN HÀNG",
+                    ToEmail = body.DiaChiNavigation?.Email,
+                };
+                var mailSend = new MailService(mailSettings);
+                mailSend.SendEmailAsync(mailBody);
                 if (hoadon == null) return BadRequest();
                 return await VNPAY(hoadon);
             }
@@ -396,8 +405,17 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             try
             {
-                var hd = _context.PhieuNhapXuats.FirstOrDefault(x => x.Id == id);
+                var hd = _context.PhieuNhapXuats.Include(x=>x.DiaChiNavigation).FirstOrDefault(x => x.Id == id);
                 if (hd == null) return NotFound();
+                var bodyString = await new Confirm(_HostEnvironment, hd).RenderBody();
+                var mailBody = new MailRequest()
+                {
+                    Body = bodyString.ToString(),
+                    Subject = "XÁC NHẬN ĐƠN HÀNG",
+                    ToEmail = hd.DiaChiNavigation?.Email,
+                };
+                var mailSend = new MailService(mailSettings);
+                mailSend.SendEmailAsync(mailBody);
                 var ClientURL = _configuration.GetSection("ClientURL").Value;
                 var token = JWTHandler.Generate(DateTime.Now.AddDays(1));
                 return Redirect($"{ClientURL}/orderStatus/{hd.Id}/{token}");
@@ -428,7 +446,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         }
 
         [HttpPost("StripePayment")]
-        public IActionResult OrderWithStripe(PhieuNhapXuat body)
+        public async Task<IActionResult> OrderWithStripe(PhieuNhapXuat body)
         {
             try
             {
@@ -456,25 +474,8 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 StripeConfiguration.ApiKey = _configuration["StripeKey:SecretKey"];
                 var domain = _configuration["BaseURL"];
                 var items = new List<SessionLineItemOptions>();
+                var prices = Convert.ToInt32(body.ThanhTien);
                     if (body.ChiTietNhapXuats.Count < 0) return BadRequest();
-               
-                var customerOtp = new CustomerCreateOptions
-                {
-                    Name = body.DiaChiNavigation.Name,
-                    Email = body.DiaChiNavigation.Email.Trim()
-                };
-                var customerService = new CustomerService();
-               //var customer =  customerService.Create(customerOtp);
-                //var invoiceOtp = new InvoiceCreateOptions
-                //{
-                //    Customer = customer.Id,
-                //    Currency="vnd",
-                    
-                    
-                //};
-                var invoiceService = new InvoiceService();
-                //var invoice = invoiceService.Create(invoiceOtp);
-
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     LineItems = new List<SessionLineItemOptions>
@@ -490,12 +491,13 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                                     Name = "Checkout for order #" + body.Id
                                 }
                             },
+                            
                             Quantity = body.TongSoLuong
                         }
                     },
                     Mode = "payment",
                     SuccessUrl = domain + "StripeSuccess/" + body.Id,
-                    CancelUrl = domain + "StripeCancel" + body.Id,
+                    CancelUrl = domain + "StripeCancel/" + body.Id,
                     CustomerEmail = body.DiaChiNavigation.Email.Trim(),
                      
                     InvoiceCreation = new SessionInvoiceCreationOptions

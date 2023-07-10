@@ -202,7 +202,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.HasKey(e => e.MaCoupon);
 
                 entity.Property(x => x.MaCoupon).HasColumnType("char(15)");
-                entity.HasOne(e => e.ChiNhanhNavigation).WithOne(x => x.CouponNavigation).HasForeignKey<Coupon>(e => e.MaChiNhanh);
+                entity.HasOne(e => e.ChiNhanhNavigation).WithMany(x => x.Coupons).HasForeignKey(x=>x.MaChiNhanh).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<ChiTietCoupon>(entity =>
             {

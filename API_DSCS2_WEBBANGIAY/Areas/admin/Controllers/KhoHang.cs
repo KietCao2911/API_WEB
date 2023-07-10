@@ -56,7 +56,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }
                 if (OnlyVersion)
                 {
-
                 products = products.Where(x=> x.SanPhamNavigation.ParentID != null);
                 }
                 else
@@ -65,10 +64,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }
                 if (s is not null && s.Length > 0)
                 {
-                    products = products.Where(x => x.SanPhamNavigation.TenSanPham.Trim().Contains(s.Trim()));
-
+                    products = products.Where(x => x.SanPhamNavigation.Slug.Trim().Contains(s.Trim()));
                 }
-                return Ok(products);
+                return Ok(products.Take(10));
             }catch(Exception err)
             {
                 return BadRequest(err.Message); 

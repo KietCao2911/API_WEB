@@ -53,6 +53,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
+                if(coupon.MaChiNhanh is null || coupon.MaChiNhanh.Length<=0)
+                {
+                    coupon.MaChiNhanh = null;
+                }
                 _context.Coupons.Add(coupon);
                 _context.SaveChanges();
                 return Ok(coupon);

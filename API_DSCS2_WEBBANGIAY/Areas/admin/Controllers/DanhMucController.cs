@@ -101,11 +101,19 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             //{
             //    return BadRequest();
             //}
-         
+
 
             try
             {
-                danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
+                var parentDM = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Id == danhMuc.ParentCategoryID);
+                if (parentDM != null)
+                {
+                    danhMuc.Slug = CustomSlug.Slugify(parentDM.Slug + " " + danhMuc.TenDanhMuc);
+                }
+                else
+                {
+                    danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
+                }
                 _context.Entry(danhMuc).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }

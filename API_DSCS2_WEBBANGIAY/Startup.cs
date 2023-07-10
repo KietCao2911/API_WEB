@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.SqlServer;
 using API_DSCS2_WEBBANGIAY.Utils;
+using API_DSCS2_WEBBANGIAY.Services;
 
 namespace API_DSCS2_WEBBANGIAY
 {
@@ -60,6 +61,7 @@ namespace API_DSCS2_WEBBANGIAY
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                 };
             });
+            services.AddHangfireServer();
             services.AddDistributedMemoryCache();
             services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
@@ -75,11 +77,11 @@ namespace API_DSCS2_WEBBANGIAY
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API_DSCS2_WEBBANGIAY", Version = "v1" });
             });
             services.AddTransient<IMailService, MailService>();
+            services.AddTransient<IDiscountManager, DiscountManager>();
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.Configure<ElasticSetting>(Configuration.GetSection("ElasticSearch"));
             services.AddSignalR();
         }
-        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -92,6 +94,9 @@ namespace API_DSCS2_WEBBANGIAY
             app.UseCors("MyAllowSpecificOrigins");
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseHangfireDashboard();
+
+            RecurringJob.AddOrUpdate<IDiscountManager>(x => x.CheckDiscount(), Cron.Minutely);
             app.UseFileServer(new FileServerOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
@@ -102,8 +107,6 @@ namespace API_DSCS2_WEBBANGIAY
             app.UseAuthorization();
 
             app.UseStaticFiles();
-           
-            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -111,8 +114,6 @@ namespace API_DSCS2_WEBBANGIAY
           pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}"
         );
                 endpoints.MapControllers();
-                endpoints.MapHub<RoomMessageHub>("/ChatRoom");
-
             });
         }
     }

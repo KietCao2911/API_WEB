@@ -111,18 +111,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         }
 
         // DELETE: api/DanhMucDetails/5
-        [HttpDelete("{idDM}/{idSP}")]
-        public async Task<IActionResult> DeleteDanhMucDetails(int idDM,string idSP)
+        [HttpPost("DeleteDanhMucDetails")]
+        public async Task<IActionResult> DeleteDanhMucDetails(List<DanhMucDetails> body)
         {
-            var danhMucDetails = _context.DanhMucDetails.FirstOrDefault(x=>x.MaSanPham==idSP&&x.danhMucId==idDM);
-            if (danhMucDetails == null)
+            try
             {
-                return NotFound();
+                _context.DanhMucDetails.RemoveRange(body);
+                _context.SaveChanges();
+                return Ok(body);
+            }catch(Exception err)
+            {
+                return BadRequest();
             }
-            _context.DanhMucDetails.Remove(danhMucDetails);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool DanhMucDetailsExists(int id)

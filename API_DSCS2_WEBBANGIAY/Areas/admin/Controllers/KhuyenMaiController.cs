@@ -21,6 +21,20 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             _context = context;
         }
+        [HttpGet("SearchProducts")]
+        public async Task<IActionResult> SearchProducts([FromQuery(Name = "s")] string s)
+        {
+            try
+            {
+                if (s is null || s.Length <= 0) return NotFound();
+                var products= _context.SanPhams.Where(x=>x.Slug.Contains(s.Trim().ToLower())&&x.isSale==false&&x.ParentID==null);
+                return Ok(products);
+            }
+            catch (Exception err)
+            {
+                return BadRequest(err.Message);
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> Gets()
         {
@@ -124,6 +138,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 body.TrangThai = 1;
                 _context.Entry(body).State = EntityState.Modified;
                 _context.SaveChanges();
+         
                 trans.Commit();
                 return Ok(body);
             }
@@ -134,17 +149,23 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
         }
         [HttpPut("Cancel")]
-        public async Task<IActionResult> Cancel(KhuyenMai body)
+        public  async Task<bool> Cancel (KhuyenMai body)
         {
             var trans = _context.Database.BeginTransaction();
             try
             {
-               
+
                 foreach (var item in body.ChiTietKhuyenMais)
                 {
-                    var product = _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefault(x => x.MaSanPham == item.maSanPham);
+                    var product = _context.SanPhams.Include(x => x.SanPhams).FirstOrDefault(x => x.MaSanPham == item.maSanPham);
                     if (product != null)
                     {
+                        var dmgg = _context.DanhMucs.FirstOrDefault(x => x.Slug.Trim() == "giam-gia");
+                        if (dmgg != null)
+                        {
+                            var dms = _context.DanhMucDetails.Where(x => x.MaSanPham == product.MaSanPham && x.danhMucId == dmgg.Id);
+                            _context.DanhMucDetails.RemoveRange(dms);
+                        }
                         foreach (var proc in product.SanPhams)
                         {
                             proc.isSale = false;
@@ -154,7 +175,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         }
                         product.isSale = false;
                         product.GiaBanLe += product.TienDaGiam;
-                        product.TienDaGiam =0;
+                        product.TienDaGiam = 0;
                         _context.Entry(product).State = EntityState.Modified;
                     }
                 }
@@ -162,13 +183,51 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 _context.Entry(body).State = EntityState.Modified;
                 _context.SaveChanges();
                 trans.Commit();
-                return Ok(body);
+                return true;
             }
             catch (Exception err)
             {
                 trans.RollbackAsync();
-                return BadRequest();
+                return false;
             }
         }
     }
+        //[HttpPut("Cancel")]
+        //public async Task<IActionResult> Cancel(KhuyenMai body)
+        //{
+        //    var trans = _context.Database.BeginTransaction();
+        //    try
+        //    {
+               
+        //        foreach (var item in body.ChiTietKhuyenMais)
+        //        {
+        //            var product = _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefault(x => x.MaSanPham == item.maSanPham);
+        //            if (product != null)
+        //            {
+        //                foreach (var proc in product.SanPhams)
+        //                {
+        //                    proc.isSale = false;
+        //                    proc.GiaBanLe += proc.TienDaGiam;
+        //                    proc.TienDaGiam = 0;
+        //                    _context.Entry(proc).State = EntityState.Modified;
+        //                }
+        //                product.isSale = false;
+        //                product.GiaBanLe += product.TienDaGiam;
+        //                product.TienDaGiam =0;
+        //                _context.Entry(product).State = EntityState.Modified;
+        //            }
+        //        }
+        //        body.TrangThai = -1;
+        //        _context.Entry(body).State = EntityState.Modified;
+        //        _context.SaveChanges();
+        //        trans.Commit();
+        //        return Ok(body);
+        //    }
+        //    catch (Exception err)
+        //    {
+        //        trans.RollbackAsync();
+        //        return BadRequest();
+        //    }
+        //}
+    //}
 }

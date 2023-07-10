@@ -48,7 +48,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                       .Where(x => x.ParentID == null).OrderBy(x => x.CreatedAt);
                 if (s is not null && s.Length > 0)
                 {
-                    products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
+                    products = products.Where(x => x.Slug.Trim().ToLower().Contains(s.Trim().ToLower()));
                 }
                 if (type is not null && type.Length > 0)
                 {

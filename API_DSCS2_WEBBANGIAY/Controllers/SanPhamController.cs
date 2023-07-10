@@ -24,7 +24,10 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         }
         [HttpGet("GetAll/{maChiNhanh}")]
         public async Task<ActionResult> GetSanPhams(string? maChiNhanh,string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "type")] string type,
-            [FromQuery(Name = "color")] string color, int pageSize, int? page, [FromQuery(Name = "category")] string category, [FromQuery(Name = "brand")] string brand, [FromQuery(Name = "s")] string s)
+            [FromQuery(Name = "color")] string color, 
+            int pageSize, int? page,
+            [FromQuery(Name = "category")] string category, 
+            [FromQuery(Name = "brand")] string brand, [FromQuery(Name = "s")] string s)
         {
             try
             {
@@ -32,7 +35,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 pageSize = pageSize == 0 ? 10 : pageSize;
                 IQueryable<ChiNhanh_SanPham> products = Enumerable.Empty<ChiNhanh_SanPham>().AsQueryable();
                 var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == category);
-                products = _context.KhoHangs.Include(x => x.SanPhamNavigation)
+                products = _context.KhoHangs.Include(x=>x.SanPhamNavigation).ThenInclude(x=>x.StarReviewNavigation).Include(x => x.SanPhamNavigation)
                    .ThenInclude(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                  .Where(x => x.MaChiNhanh == maChiNhanh)
                     .Where(x => x.SanPhamNavigation.ParentID == null);
@@ -54,7 +57,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 }
                 if (s is not null && s.Length > 0)
                 {
-                    products = products.Where(x => x.SanPhamNavigation.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
+                    products = products.Where(x => x.SanPhamNavigation.Slug.Trim().ToLower().Contains(s.Trim().ToLower()));
                 }
                 if (size is not null && size.Length > 0)
                 {
@@ -82,7 +85,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                             products = products.OrderByDescending(h => h.SanPhamNavigation.ViewCount);
                         break;
                     case "sale":
-                        products = products.Where(x => x.SanPhamNavigation.TienDaGiam > 0);
+                        products = products.Where(x => x.SanPhamNavigation.isSale==true);
                         break;
                     default:
                         products = products.OrderBy(s => s.SanPhamNavigation.GiaBanLe);
